@@ -1,0 +1,87 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="#">Hotel Chatting System</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="#">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Services</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow">
+        <div class="card-body">
+          <h2 class="card-title text-center mb-4">Welcome to Hotel Chatting System</h2>
+
+          <div class="chat-container">
+            <div class="message" *ngFor="let message of messages">
+              <div class="message-content rounded p-3 mb-3" [ngClass]="{'bg-light': message.sender === 'bot', 'bg-primary text-white': message.sender === 'user'}">
+                <span>{{ message.text }}</span>
+              </div>
+            </div>
+
+            <!-- Display options initially -->
+            <div *ngIf="currentStep === 0 && !userChoice" class="row g-3">
+              <div class="col-md-6">
+                <div class="card h-100 cursor-pointer hover-shadow" (click)="chooseOption('Booking')">
+                  <div class="card-body text-center d-flex flex-column justify-content-center">
+                    <h5 class="card-title">Booking</h5>
+                    <p class="card-text">Start booking a room</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="card h-100 cursor-pointer hover-shadow" (click)="chooseOption('Complaints/Inquiry')">
+                  <div class="card-body text-center d-flex flex-column justify-content-center">
+                    <h5 class="card-title">Complaints/Inquiry</h5>
+                    <p class="card-text">Submit a complaint or inquiry</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Booking process -->
+            <div *ngIf="userChoice === 'Booking'" class="mt-4">
+              <div *ngIf="currentStep === 1" class="mb-3">
+                <input type="text" class="form-control" placeholder="Enter Region" [(ngModel)]="region" (keyup.enter)="nextStep()" />
+              </div>
+              <div *ngIf="currentStep === 2" class="mb-3">
+                <input type="text" class="form-control" placeholder="Enter Hotel" [(ngModel)]="hotel" (keyup.enter)="nextStep()" />
+              </div>
+              <div *ngIf="currentStep === 3" class="mb-3">
+                <input type="text" class="form-control" placeholder="Enter Location" [(ngModel)]="location" (keyup.enter)="nextStep()" />
+              </div>
+              <div *ngIf="currentStep === 3" class="d-grid">
+                <button class="btn btn-primary" (click)="nextStep()">Book Room</button>
+              </div>
+            </div>
+
+            <!-- Complaints/Inquiry process -->
+            <div *ngIf="userChoice === 'Complaints/Inquiry'" class="mt-4">
+              <div *ngIf="currentStep === 4" class="mb-3">
+                <textarea class="form-control" rows="3" placeholder="Enter your complaint or inquiry" [(ngModel)]="complaint" (keyup.enter)="nextStep()"></textarea>
+              </div>
+              <div *ngIf="currentStep === 4" class="d-grid">
+                <button class="btn btn-primary" (click)="nextStep()">Submit</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

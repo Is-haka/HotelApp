@@ -85,6 +85,105 @@ server.put("/hotel/update/:id", (req, res) => {
   });
 });
 
+//post api to create a region
+server.post("/region/create", (req,res)=>{
+  let details = {
+    name: req.body.name,
+  };
+
+  let qry = "insert into region set ?";
+  connection.query(qry,details,(error) =>{
+    if (error) {
+      res.send({ status: false, message: "Region failed to be added"});
+    }
+    res.send({ status: true, message: "Region added successful"});
+  });
+
+});
+
+//post api to view regions
+server.get("/region", (req,res) => {
+  var qry = "select * from region";
+
+    connection.query(qry, (error, result) => {
+    if (error) {
+      res.send({ status: false, message: "Region cannot be viewed" });
+    } else {
+      res.send({ status: true, data: result });
+    }
+  });
+
+});
+
+//post api for create location
+server.post("/location/create", (req,res)=>{
+  let details = {
+    name: req.body.name,
+    region_id: req.body.region_id
+  };
+
+  let qry = "insert into location set ?";
+  connection.query(qry,details,(error) =>{
+    if (error) {
+      res.send({ status: false, message: "Location failed to be added"});
+    }
+    res.send({ status: true, message: "Location added successful"});
+  });
+
+});
+
+//api to view location
+server.get("/location", (req,res) => {
+  var qry = "select * from location";
+
+    connection.query(qry, (error, result) => {
+    if (error) {
+      res.send({ status: false, message: "Region cannot be viewed" });
+    } else {
+      res.send({ status: true, data: result });
+    }
+  });
+
+});
+
+
+//post api for booking for create
+server.post("/booking/create", (req,res)=>{
+  let details = {
+    room: req.body.room,
+    bk_status: req.body.bk_status,
+    region_id: req.body.region_id,
+    book_no: req.body.book_no,
+    start_date: req.body.start_date,
+    end_date: req.body.end_date
+  };
+
+  let qry = "insert into booking set ?";
+  connection.query(qry,details,(error) =>{
+    if (error) {
+      res.send({ status: false, message: "booking failed to be added"});
+    }
+    res.send({ status: true, message: "booking added successful"});
+  });
+
+});
+
+server.get("/booking", (req,res) => {
+  var qry = "select * from booking";
+
+    connection.query(qry, (error, result) => {
+    if (error) {
+      res.send({ status: false, message: "Booking cannot be viewed" });
+    } else {
+      res.send({ status: true, data: result });
+    }
+  });
+
+});
+
+
+
+
 // // GET API to view all todos
 // server.get("/todo", (req, res) => {
 //   var qry = "select * from todos";

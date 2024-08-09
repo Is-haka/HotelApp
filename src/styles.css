@@ -1,1 +1,54 @@
-/* You can add global styles to this file, and also import other style files */
+.chat-container {
+  padding: 10px;
+  max-width: 600px;
+  margin: auto;
+  /* background-color: #f8f9fa; */
+}
+
+.message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.message-content {
+  background-color: #e9ecef;
+  padding: 10px;
+  border-radius: 20px;
+  max-width: 100%;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  border: none; /* Remove border */
+}
+
+.input-group {
+  margin-top: 10px;
+}
+
+.input-group .form-control {
+  border-radius: 20px;
+  border: none; /* Remove border */
+}
+
+.btn-primary {
+  border-radius: 20px;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.hover-shadow:hover {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+.card {
+  border: none; /* Remove card border */
+}
+
+.card-body {
+  border: none; /* Remove card body border */
+}

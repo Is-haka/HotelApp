@@ -1,15 +1,14 @@
 .chat-container {
-  border: 1px solid #ddd;
-  border-radius: 10px;
   padding: 10px;
   max-width: 600px;
   margin: auto;
-  background-color: #f8f9fa;
+  /* background-color: #f8f9fa; */
 }
 
 .message {
   display: flex;
   align-items: center;
+  justify-content: center;
   margin-bottom: 10px;
 }
 
@@ -21,6 +20,7 @@
   display: flex;
   justify-content: center;
   text-align: center;
+  border: none; /* Remove border */
 }
 
 .input-group {
@@ -29,6 +29,7 @@
 
 .input-group .form-control {
   border-radius: 20px;
+  border: none; /* Remove border */
 }
 
 .btn-primary {
@@ -42,4 +43,12 @@
 .hover-shadow:hover {
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
   transition: box-shadow 0.3s ease-in-out;
+}
+
+.card {
+  border: none; /* Remove card border */
+}
+
+.card-body {
+  border: none; /* Remove card body border */
 }

@@ -113,7 +113,7 @@
                 <p><strong>Hotel:</strong> {{ selectedHotelName }}</p>
                 <p><strong>Start Date:</strong> {{ startDate | date:'mediumDate' }}</p>
                 <p><strong>End Date:</strong> {{ endDate | date:'mediumDate' }}</p>
-                <div class="d-grid mt-3">
+                <div *ngIf="bookingStatus !== 'success'" class="d-grid mt-3">
                   <button class="btn btn-primary" (click)="bookRoom()">Confirm Booking</button>
                 </div>
                 <!-- Booking Status Message -->

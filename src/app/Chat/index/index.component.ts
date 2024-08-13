@@ -101,6 +101,7 @@ export class IndexComponent implements OnInit {
 
   fetchHotels() {
     const regionId = encodeURIComponent(this.region);
+
     const startDate = new Date(this.startDate);
     const endDate = new Date(this.endDate);
 
@@ -112,9 +113,11 @@ export class IndexComponent implements OnInit {
   this.days = daysDifference;
 
     this.http.get(`http://localhost:3000/hotel?region_id=${regionId}&duration=${interval}`).subscribe(
+
       (response: any) => {
         if (response.status) {
           this.hotels = response.data;
+          // console.log(response.data)
           if (this.hotels.length > 0) {
             this.messages.push({
               text: 'Please select a hotel from the list:',

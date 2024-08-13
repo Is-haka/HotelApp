@@ -67,7 +67,8 @@ export class IndexComponent implements OnInit {
     switch (this.currentStep) {
       case 1:
         if (this.region) {
-          this.fetchHotels();
+            this.fetchHotels();
+
         }
         break;
       case 2:
@@ -106,10 +107,14 @@ export class IndexComponent implements OnInit {
 
   fetchHotels() {
     const regionId = encodeURIComponent(this.region);
-    this.http.get(`http://localhost:3000/hotel?region_id=${regionId}`).subscribe(
+
+    //connection btn front end to back end from region fetched by name
+
+    this.http.get(`http://localhost:3000/region?name=${regionId}`).subscribe(
       (response: any) => {
         if (response.status) {
           this.hotels = response.data;
+          // console.log(response.data)
           if (this.hotels.length > 0) {
             this.messages.push({
               text: 'Please select a hotel from the list:',

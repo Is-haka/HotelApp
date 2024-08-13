@@ -27,14 +27,6 @@ connection.connect(function (error) {
   }
 });
 
-// Specify the port
-server.listen(3000, function check(error) {
-  if (error) {
-    console.log("Error.....!!!");
-  } else {
-    console.log("Started...!!!");
-  }
-});
 
 
 //post api to create a hotel
@@ -102,9 +94,7 @@ server.put("/hotel/update/:id", (req, res) => {
 
 //post api to create a region
 server.post("/region/create", (req,res)=>{
-  let details = {
-    name: req.body.name,
-  };
+  let details = { name: req.body.name};
 
   let qry = "insert into region set ?";
   connection.query(qry,details,(error) =>{
@@ -116,20 +106,43 @@ server.post("/region/create", (req,res)=>{
 
 });
 
-//post api to view regions
-server.get("/region", (req,res) => {
-  const regionName = req.query.name;
-  var qry = "select id from region where name = ?";
 
-    connection.query(qry,[regionName], (error, result) => {
+//************************************************************************************************* */
+                // Server Modification search region by name
+               // modificatio search through region name
+
+server.get('/region', (req, res) => {
+
+   const regionName = req.query.name;
+        //  test if not region name
+      if (!regionName) {
+    return res.status(400).send({ status: false, message: 'Region name is required' });
+  }
+
+  // Query to fetch hotels based on region name by join two table region and hotel
+  const query = `
+    SELECT h.id, h.name, h.address, h.contact_info, r.name AS regionName
+    FROM hotel h
+    JOIN region r ON h.region_id = r.id
+    WHERE r.name LIKE ?
+  `;
+  const searchTerm = `%${regionName}%`; // Use % as wildcard for partial matching
+
+  connection.query(query, [regionName,searchTerm], (error, results) => {
     if (error) {
-      res.send({ status: false, message: "Region cannot be viewed" });
+      console.error('Database query error:', error);
+      return res.status(500).send({ status: false, message: 'An error occurred while searching for hotels' });
+    }
+
+    if (results.length > 0) {
+      res.send({ status: true, data: results });
     } else {
-      res.send({ status: true, data: result });
+      res.send({ status: false, message: 'No hotels found for the specified region' });
     }
   });
-
 });
+//************************************************************************************************* */
+
 
 //post api for create location
 server.post("/location/create", (req,res)=>{
@@ -269,3 +282,11 @@ server.get('/rooms', (req, res) => {
   });
 });
 
+// Specify the port
+server.listen(3000, function check(error) {
+  if (error) {
+    console.log("Error.....!!!");
+  } else {
+    console.log("Started...!!!");
+  }
+});

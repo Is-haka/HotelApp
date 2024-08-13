@@ -167,6 +167,7 @@ server.get("/location", (req,res) => {
 server.post("/booking/create", (req, res) => {
   let details = {
     room: req.body.room,
+    duration: req.body.duration,
     hotel_id: req.body.hotel_id,
     region_id: req.body.region_id,
     book_no: req.body.book_no,
@@ -177,6 +178,7 @@ server.post("/booking/create", (req, res) => {
   let qry = "insert into booking set ?";
   connection.query(qry, details, (error) => {
     if (error) {
+      console.log(error);
       res.send({ status: false, message: "Booking failed." });
     } else {
       res.send({ status: true, message: "Booking successful." });

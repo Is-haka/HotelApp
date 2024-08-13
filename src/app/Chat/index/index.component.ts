@@ -27,6 +27,7 @@ export class IndexComponent implements OnInit {
   rooms: any[] = [];
   bookingNumber: string = '';
   countdownActive: boolean = false;
+  days: number = 0;
 
   messages: {
     sender: any;
@@ -67,37 +68,31 @@ export class IndexComponent implements OnInit {
     switch (this.currentStep) {
       case 1:
         if (this.region) {
-          this.fetchHotels();
+          console.log(this.startDate + " " + this.endDate);
+          this.messages.push({
+            text: 'Please select the start and end date',
+            sender: undefined
+          });
+          this.currentStep = 2;
         }
         break;
       case 2:
-        if (this.selectedHotel) {
-          this.fetchRooms();
+        if (this.startDate && this.endDate) {
+          this.fetchHotels();
+          this.currentStep = 3;
         }
         break;
       case 3:
-        if (this.selectedRoom) {
-          this.currentStep = 4;
-          this.messages.push({
-            text: 'Please select the start and end dates for your booking.',
-            sender: 'bot'
-          });
-        }
+        this.fetchRooms();
+        this.currentStep = 4;
         break;
       case 4:
-        if (this.startDate && this.endDate) {
           this.generateBookingNumber();
           this.currentStep = 5;
           this.messages.push({
             text: 'Please review your booking details.',
             sender: 'bot'
           });
-        } else {
-          this.messages.push({
-            text: 'Please select both start and end dates.',
-            sender: 'bot'
-          });
-        }
         break;
     }
 
@@ -106,7 +101,17 @@ export class IndexComponent implements OnInit {
 
   fetchHotels() {
     const regionId = encodeURIComponent(this.region);
-    this.http.get(`http://localhost:3000/hotel?region_id=${regionId}`).subscribe(
+    const startDate = new Date(this.startDate);
+    const endDate = new Date(this.endDate);
+
+  // Calculate the interval in days
+  const timeDifference = endDate.getTime() - startDate.getTime();
+  const daysDifference = Math.round(timeDifference / (1000 * 3600 * 24));
+  const interval = encodeURIComponent(daysDifference);
+
+  this.days = daysDifference;
+
+    this.http.get(`http://localhost:3000/hotel?region_id=${regionId}&duration=${interval}`).subscribe(
       (response: any) => {
         if (response.status) {
           this.hotels = response.data;
@@ -115,7 +120,7 @@ export class IndexComponent implements OnInit {
               text: 'Please select a hotel from the list:',
               sender: 'bot'
             });
-            this.currentStep = 2;
+            this.currentStep = 3;
           } else {
             this.messages.push({
               text: 'No hotels available in this region.',
@@ -148,7 +153,7 @@ export class IndexComponent implements OnInit {
             text: 'Please select a room type:',
             sender: 'bot'
           });
-          this.currentStep = 3;
+          this.currentStep = 4;
         } else {
           this.messages.push({
             text: 'Failed to fetch rooms. Please try again later.',
@@ -199,6 +204,7 @@ export class IndexComponent implements OnInit {
   bookRoom() {
     this.http.post(`http://localhost:3000/booking/create`, {
       room: this.selectedRoom,
+      duration: this.days,
       hotel_id: this.selectedHotel,
       region_id: this.region,
       book_no: this.bookingNumber,
@@ -264,6 +270,7 @@ export class IndexComponent implements OnInit {
     this.bookingNumber = '';
     this.bookingStatus = ''; // Reset booking status
     this.countdownActive = false;
+    this.days = 0;
     this.messages = [{
       text: 'Welcome! Please choose an option to proceed.',
       sender: undefined

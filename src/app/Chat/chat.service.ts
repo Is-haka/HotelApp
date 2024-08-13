@@ -8,5 +8,16 @@ import { catchError } from 'rxjs';
 })
 export class ChatService {
 
-  constructor() { }
+  private apiURL = "http://localhost:3000";
+
+  httpOptions = {
+    Headers: new HttpHeaders ({
+      'Content-type': 'application/json'
+    })
+  };
+
+
+  constructor(private httpClient: HttpClient) { }
+
+  
 }

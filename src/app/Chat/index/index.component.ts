@@ -11,7 +11,8 @@ import { FormsModule } from '@angular/forms';
 })
 export class IndexComponent implements OnInit {
   region: string = '';
-  hotel: string = '';
+  checkInDate: string = '';
+  checkOutDate: string = '';
   location: string = '';
   complaint: string = '';
   currentStep: number = 0;
@@ -42,7 +43,7 @@ sender: any; text: string
         text: 'You selected Complaints/Inquiry. Please enter your complaint or inquiry.',
         sender: undefined
       });
-      this.currentStep = 4;
+      this.currentStep = 5;
     }
   }
 
@@ -53,31 +54,29 @@ sender: any; text: string
         sender: undefined
       });
       this.currentStep++;
-    } else if (this.currentStep === 2 && this.hotel) {
+    } else if (this.currentStep === 2 && this.checkInDate) {
       this.messages.push({
-        text: `Hotel: ${this.hotel}`,
+        text: `Check-in date: ${this.checkInDate}`,
         sender: undefined
       });
       this.currentStep++;
-    } else if (this.currentStep === 3 && this.location) {
+    }  else if(this.currentStep === 3 && this.checkOutDate) {
       this.messages.push({
-        text: `Location: ${this.location}`,
+        text: `Check-out date: ${this.checkOutDate}`,
         sender: undefined
       });
       this.bookRoom();
       this.currentStep++;
-    } else if (this.currentStep === 4 && this.complaint) {
-      this.submitComplaint();
     }
   }
 
   bookRoom() {
     this.messages.push({
-      text: `Booking room at ${this.hotel}, ${this.location}, ${this.region}`,
+      text: `Booking room at ${this.checkInDate}, ${this.checkOutDate}, ${this.region}`,
       sender: undefined
     });
     this.messages.push({
-      text: 'Do you have any complaints or comments?',
+      text: 'Thank you for booking with us!',
       sender: undefined
     });
   }
@@ -93,7 +92,8 @@ sender: any; text: string
   resetChat() {
     this.currentStep = 0;
     this.region = '';
-    this.hotel = '';
+    this.checkInDate = '';
+    this.checkOutDate = '';
     this.location = '';
     this.complaint = '';
     this.userChoice = '';

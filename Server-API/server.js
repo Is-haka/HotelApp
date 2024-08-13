@@ -1,6 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const mysql = require("mysql");
+const mysql = require("mysql2");
 const cors = require("cors"); // Import cors middleware
 
 const server = express();
@@ -54,20 +54,35 @@ server.post("/hotel/create", (req,res)=>{
 
 });
 
-server.get("/hotel", (req,res) => {
-  var qry = "select * from hotel";
+// GET API to fetch hotels by region
+server.get('/hotel', (req, res) => {
+  const regionId = parseInt(req.query.region_id, 10);
+  console.log('Fetching hotels for region:', regionId);
 
-    connection.query(qry, (error, result) => {
+  let qry = `
+    SELECT hotel.*,
+           COUNT(room.id) as available_rooms,
+           SUM(CASE WHEN room.type = 'single' THEN 1 ELSE 0 END) as single_rooms,
+           SUM(CASE WHEN room.type = 'double' THEN 1 ELSE 0 END) as double_rooms
+    FROM hotel
+    LEFT JOIN room ON room.hotel_id = hotel.id
+    WHERE hotel.region_id = ?
+    GROUP BY hotel.id;
+  `;
+
+  connection.query(qry, [regionId], (error, result) => {
     if (error) {
-      res.send({ status: false, message: "Hotel cannot be viewed" });
+      console.error('Database query error:', error);
+      res.status(500).send({ status: false, message: 'Unable to fetch hotels.' });
     } else {
+      console.log('Query Result:', result);
       res.send({ status: true, data: result });
     }
   });
-
 });
 
-// PUT API to update a todo by ID
+
+// PUT API to update a hotel by ID
 server.put("/hotel/update/:id", (req, res) => {
   var hotelId = req.params.id;
   var newName = req.body.name;
@@ -103,9 +118,10 @@ server.post("/region/create", (req,res)=>{
 
 //post api to view regions
 server.get("/region", (req,res) => {
-  var qry = "select * from region";
+  const regionName = req.query.name;
+  var qry = "select id from region where name = ?";
 
-    connection.query(qry, (error, result) => {
+    connection.query(qry,[regionName], (error, result) => {
     if (error) {
       res.send({ status: false, message: "Region cannot be viewed" });
     } else {
@@ -148,10 +164,10 @@ server.get("/location", (req,res) => {
 
 
 //post api for booking for create
-server.post("/booking/create", (req,res)=>{
+server.post("/booking/create", (req, res) => {
   let details = {
     room: req.body.room,
-    bk_status: req.body.bk_status,
+    hotel_id: req.body.hotel_id,
     region_id: req.body.region_id,
     book_no: req.body.book_no,
     start_date: req.body.start_date,
@@ -159,14 +175,15 @@ server.post("/booking/create", (req,res)=>{
   };
 
   let qry = "insert into booking set ?";
-  connection.query(qry,details,(error) =>{
+  connection.query(qry, details, (error) => {
     if (error) {
-      res.send({ status: false, message: "booking failed to be added"});
+      res.send({ status: false, message: "Booking failed." });
+    } else {
+      res.send({ status: true, message: "Booking successful." });
     }
-    res.send({ status: true, message: "booking added successful"});
   });
-
 });
+
 
 server.get("/booking", (req,res) => {
   var qry = "select * from booking";
@@ -182,46 +199,73 @@ server.get("/booking", (req,res) => {
 });
 
 
+// Handle and store complaint
+// server.post('/complaint/create', (req, res) => {
+//   const { user_id, booking_id, hotel_id, complaint_text } = req.body;
 
+//   if (!user_id || !booking_id || !hotel_id || !complaint_text) {
+//     return res.status(400).send({
+//       status: false,
+//       message: 'Missing required fields.',
+//     });
+//   }
 
-// // GET API to view all todos
-// server.get("/todo", (req, res) => {
-//   var qry = "select * from todos";
-// });
+//   // Ensure complaint_text is a string
+//   if (typeof complaint_text !== 'string') {
+//     return res.status(400).send({
+//       status: false,
+//       message: 'Invalid complaint text.',
+//     });
+//   }
 
-// // GET API to view a single todo by ID
-// server.get("/todo/:id", (req, res) => {
-//   const todoId = req.params.id;
-//   const qry = "SELECT * FROM todos WHERE id = ?";
-//   connection.query(qry, [todoId], (error, result) => {
+//   let solution = '';
+
+//   // Dynamic response based on complaint content
+//   if (complaint_text.toLowerCase().includes('wifi')) {
+//     solution = 'Please check the router and ensure it\'s connected.';
+//   } else if (complaint_text.toLowerCase().includes('room')) {
+//     solution = 'Our staff will address the room issue shortly.';
+//   } else {
+//     solution = 'Thank you for your feedback. We will look into it.';
+//   }
+
+//   // Insert the complaint into the database
+//   const qry = `INSERT INTO Complaints (user_id, booking_id, hotel_id, complaint_text, status, response_text)
+//                VALUES (?, ?, ?, ?, 'Pending', ?)`;
+
+//   connection.query(qry, [user_id, booking_id, hotel_id, complaint_text, solution], (error, results) => {
 //     if (error) {
-//       res.status(500).send({
+//       console.error('Database query error:', error);
+//       return res.status(500).send({
 //         status: false,
-//         message: "Todo with ID " + todoId + " cannot be viewed",
+//         message: 'Complaint could not be submitted.',
 //       });
-//     } else if (result.length > 0) {
-//       res.send({ status: true, data: result[0] });
 //     } else {
-//       res.status(404).send({ status: false, message: "Todo not found" });
+//       return res.send({
+//         status: true,
+//         message: solution,
+//         complaintId: results.insertId,
+//       });
 //     }
 //   });
 // });
 
+server.get('/rooms', (req, res) => {
+  const hotelId = req.query.hotel_id;
 
+  if (!hotelId) {
+    return res.status(400).send({ status: false, message: 'Hotel ID is required.' });
+  }
 
+  const qry = `SELECT * FROM room WHERE hotel_id = ?`;
 
-// // DELETE API to delete a todo by ID
-// server.delete("/todo/:id", (req, res) => {
-//   var todoId = req.params.id;
-//   var qry = "delete from todos where id = ?";
-//   connection.query(qry, [todoId], (error, result) => {
-//     if (error) {
-//       res.send({
-//         status: false,
-//         message: "Failed to delete todo",
-//       });
-//     } else {
-//       res.send({ status: true, message: "Todo deleted successfully" });
-//     }
-//   });
-// });
+  connection.query(qry, [hotelId], (error, result) => {
+    if (error) {
+      console.error('Database query error:', error);
+      return res.status(500).send({ status: false, message: 'Unable to fetch rooms.' });
+    }
+
+    res.send({ status: true, data: result });
+  });
+});
+

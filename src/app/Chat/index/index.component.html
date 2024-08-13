@@ -28,9 +28,9 @@
           <h2 class="card-title text-center mb-4">Welcome to Hotel Chatting System</h2>
 
           <div class="chat-container">
-            <div class="message" *ngFor="let message of messages">
-              <div class="message-content rounded p-3 mb-3" [ngClass]="{'bg-light': message.sender === 'bot', 'bg-primary text-white': message.sender === 'user'}">
-                <span>{{ message.text }}</span>
+            <div class="message d-flex position-relative justify-content-start" *ngFor="let message of messages">
+              <div class="message-content rounded p-2 mb-2" [ngClass]="{'bg-light': message.sender === 'bot', 'bg-primary text-white': message.sender === 'user'}">
+                <small class="d-block text-start">{{ message.text }}</small>
               </div>
             </div>
 
@@ -57,15 +57,17 @@
             <!-- Booking process -->
             <div *ngIf="userChoice === 'Booking'" class="mt-4">
               <div *ngIf="currentStep === 1" class="mb-3">
-                <input type="text" class="form-control" placeholder="Enter Region" [(ngModel)]="region" (keyup.enter)="nextStep()" />
+                <input type="text" class="form-control form-control-sm form-control-sm" placeholder="Enter Region" [(ngModel)]="region" (keyup.enter)="nextStep()" />
               </div>
               <div *ngIf="currentStep === 2" class="mb-3">
-                <input type="text" class="form-control" placeholder="Enter Hotel" [(ngModel)]="hotel" (keyup.enter)="nextStep()" />
+                <label for="checkInDate" class="form-label">Check-in Date</label>
+                <input type="date" class="form-control form-control-sm" placeholder="Enter Check-in date" [(ngModel)]="checkInDate" (keyup.enter)="nextStep()" />
               </div>
               <div *ngIf="currentStep === 3" class="mb-3">
-                <input type="text" class="form-control" placeholder="Enter Location" [(ngModel)]="location" (keyup.enter)="nextStep()" />
+                <label for="checkOutDate" class="form-label">Check-out Date</label>
+                <input type="date" class="form-control form-control-sm" placeholder="Enter check-out date" [(ngModel)]="checkOutDate" (keyup.enter)="nextStep()" />
               </div>
-              <div *ngIf="currentStep === 3" class="d-grid">
+              <div *ngIf="currentStep === 4" class="d-grid">
                 <button class="btn btn-primary" (click)="nextStep()">Book Room</button>
               </div>
             </div>
@@ -73,7 +75,7 @@
             <!-- Complaints/Inquiry process -->
             <div *ngIf="userChoice === 'Complaints/Inquiry'" class="mt-4">
               <div *ngIf="currentStep === 4" class="mb-3">
-                <textarea class="form-control" rows="3" placeholder="Enter your complaint or inquiry" [(ngModel)]="complaint" (keyup.enter)="nextStep()"></textarea>
+                <textarea class="form-control form-control-sm" rows="3" placeholder="Enter your complaint or inquiry" [(ngModel)]="complaint" (keyup.enter)="nextStep()"></textarea>
               </div>
               <div *ngIf="currentStep === 4" class="d-grid">
                 <button class="btn btn-primary" (click)="nextStep()">Submit</button>

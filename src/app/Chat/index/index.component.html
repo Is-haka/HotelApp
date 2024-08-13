@@ -60,32 +60,6 @@
 
               <!-- Step 2: Display Hotels -->
               <div *ngIf="currentStep === 2" class="mb-3">
-                <ul class="list-group">
-                  <li
-                    class="list-group-item cursor-pointer"
-                    *ngFor="let hotel of hotels"
-                    (click)="selectHotel(hotel.id)"
-                  >
-                    {{ hotel.name }}
-                  </li>
-                </ul>
-              </div>
-
-              <!-- Step 3: Select Room Type -->
-              <div *ngIf="currentStep === 3" class="mb-3">
-                <ul class="list-group">
-                  <li
-                    class="list-group-item cursor-pointer"
-                    *ngFor="let room of rooms"
-                    (click)="selectRoom(room.id)"
-                  >
-                    {{ room.type }} room - ${{ room.price }}
-                  </li>
-                </ul>
-              </div>
-
-              <!-- Step 4: Choose Duration -->
-              <div *ngIf="currentStep === 4" class="mb-3">
                 <label for="startDate" class="form-label">Start Date</label>
                 <input
                   type="date"
@@ -103,16 +77,43 @@
                 <button class="btn btn-primary mt-2" (click)="nextStep()">Next</button>
               </div>
 
+              <!-- Step 3: Select Room Type -->
+              <div *ngIf="currentStep === 3" class="mb-3">
+                <ul class="list-group">
+                  <li
+                    class="list-group-item cursor-pointer"
+                    *ngFor="let hotel of hotels"
+                    (click)="selectHotel(hotel.id)"
+                  >
+                    {{ hotel.name }}
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Step 4: Choose Duration -->
+              <div *ngIf="currentStep === 4" class="mb-3">
+                <ul class="list-group">
+                  <li
+                    class="list-group-item cursor-pointer"
+                    *ngFor="let room of rooms"
+                    (click)="selectRoom(room.id)"
+                  >
+                    {{ room.type }} room - ${{ room.price}}
+                  </li>
+                </ul>
+              </div>
+
               <!-- Step 5: Review and Confirm Booking -->
               <div *ngIf="currentStep === 5" class="mt-3">
                 <h5>Review Your Booking:</h5>
                 <p><strong>Booking Number:</strong> {{ bookingNumber }}</p>
                 <p><strong>Room Type:</strong> {{ selectedRoomType }}</p>
-                <p><strong>Room Price:</strong> ${{ selectedRoomPrice }}</p>
+                <p><strong>Room Price:</strong> ${{ selectedRoomPrice }} <strong>Total Price </strong>➡️ {{selectedRoomPrice * days }}</p>
                 <p><strong>Region:</strong> {{ region }}</p>
                 <p><strong>Hotel:</strong> {{ selectedHotelName }}</p>
                 <p><strong>Start Date:</strong> {{ startDate | date:'mediumDate' }}</p>
                 <p><strong>End Date:</strong> {{ endDate | date:'mediumDate' }}</p>
+                <p><strong>Days:</strong> {{ days }}</p>
                 <div *ngIf="bookingStatus !== 'success'" class="d-grid mt-3">
                   <button class="btn btn-primary" (click)="bookRoom()">Confirm Booking</button>
                 </div>

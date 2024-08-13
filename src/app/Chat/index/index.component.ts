@@ -108,7 +108,8 @@ export class IndexComponent implements OnInit {
   fetchHotels() {
     const regionId = encodeURIComponent(this.region);
 
-           // http://localhost:3000/hotels?name=aru
+    //connection btn front end to back end from region fetched by name
+
     this.http.get(`http://localhost:3000/region?name=${regionId}`).subscribe(
       (response: any) => {
         if (response.status) {

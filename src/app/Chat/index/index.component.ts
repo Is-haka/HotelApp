@@ -70,7 +70,7 @@ export class IndexComponent implements OnInit {
         if (this.region) {
           this.messages.push({
             text: 'Please select the start and end date',
-            sender: undefined
+            sender: 'bot'
           });
           this.currentStep = 2;
         }

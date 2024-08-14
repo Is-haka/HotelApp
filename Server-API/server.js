@@ -111,15 +111,14 @@ server.post("/region/create", (req,res)=>{
                 // Server Modification search region by name
                // modificatio search through region name
 
-server.get('/region', (req, res) => {
+  server.get('/region', (req, res) => {
+  const regionName = req.query.name;
 
-   const regionName = req.query.name;
-        //  test if not region name
-      if (!regionName) {
+  if (!regionName) {
     return res.status(400).send({ status: false, message: 'Region name is required' });
   }
 
-  // Query to fetch hotels based on region name by join two table region and hotel
+  // Query to fetch hotels based on region name by joining two tables: region and hotel
   const query = `
     SELECT h.id, h.name, h.address, h.contact_info, r.name AS regionName
     FROM hotel h
@@ -128,7 +127,7 @@ server.get('/region', (req, res) => {
   `;
   const searchTerm = `%${regionName}%`; // Use % as wildcard for partial matching
 
-  connection.query(query, [regionName,searchTerm], (error, results) => {
+  connection.query(query, [searchTerm], (error, results) => {
     if (error) {
       console.error('Database query error:', error);
       return res.status(500).send({ status: false, message: 'An error occurred while searching for hotels' });
@@ -140,7 +139,8 @@ server.get('/region', (req, res) => {
       res.send({ status: false, message: 'No hotels found for the specified region' });
     }
   });
-});
+  });
+
 //************************************************************************************************* */
 
 
@@ -174,6 +174,37 @@ server.get("/location", (req,res) => {
   });
 
 });
+
+
+/*
+ * Before pushing the booking into the database, we first fetch the region by name
+ * in order to get the id of that region that will then going to be recorded into the
+ * booking relation through this API endpoint
+*/
+
+// API endpoint to get region ID by region name
+server.get('/region/id', (req, res) => {
+  const regionName = req.query.name;
+
+  if (!regionName) {
+    return res.status(400).send({ status: false, message: 'Region name is required' });
+  }
+
+  const query = 'SELECT id FROM region WHERE name = ?';
+  connection.query(query, [regionName], (error, results) => {
+    if (error) {
+      console.error('Database query error:', error);
+      return res.status(500).send({ status: false, message: 'An error occurred while fetching region ID' });
+    }
+
+    if (results.length > 0) {
+      res.send({ status: true, data: results[0].id });
+    } else {
+      res.send({ status: false, message: 'Region not found' });
+    }
+  });
+});
+
 
 
 //post api for booking for create

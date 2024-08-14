@@ -123,7 +123,7 @@ server.post("/region/create", (req,res)=>{
     SELECT h.id, h.name, h.address, h.contact_info, r.name AS regionName
     FROM hotel h
     JOIN region r ON h.region_id = r.id
-    WHERE r.name LIKE ?
+    WHERE r.name LIKE CONCAT('%', ?, '%')
   `;
   const searchTerm = `%${regionName}%`; // Use % as wildcard for partial matching
 
@@ -190,22 +190,23 @@ server.get('/region/id', (req, res) => {
     return res.status(400).send({ status: false, message: 'Region name is required' });
   }
 
-  const query = 'SELECT id FROM region WHERE name = ?';
-  connection.query(query, [regionName], (error, results) => {
+  // Use wildcards for partial matching
+  const query = 'SELECT * FROM region WHERE name LIKE ?';
+  const wildcardRegionName = `%${regionName}%`;  // Adding wildcards
+
+  connection.query(query, [wildcardRegionName], (error, results) => {
     if (error) {
       console.error('Database query error:', error);
       return res.status(500).send({ status: false, message: 'An error occurred while fetching region ID' });
     }
 
     if (results.length > 0) {
-      res.send({ status: true, data: results[0].id });
+      res.send({ status: true, data: results[0].id, name: results[0].name });
     } else {
       res.send({ status: false, message: 'Region not found' });
     }
   });
 });
-
-
 
 //post api for booking for create
 server.post("/booking/create", (req, res) => {
@@ -243,6 +244,62 @@ server.get("/booking", (req,res) => {
   });
 
 });
+
+ /*
+  * Check room availability by considering their booking status, room id, and duration
+  * in the booking relation
+  */
+
+  //API endpoint for the room availability in each hotel
+
+  // API endpoint to get total bookings and available rooms for each hotel and room type
+  server.get("/available", (req, res) => {
+    const startDate = req.query.start_date;
+    const endDate = req.query.end_date;
+
+    if (!startDate || !endDate) {
+      return res.status(400).send({ status: false, message: 'Start date and end date are required.' });
+    }
+    /*
+    * This endpoint here return the available rooms for each hotel, their price for each type of rooms
+    *
+    */
+    const qry = `
+      SELECT
+        h.id AS hotel_id,
+        h.name AS hotel_name,
+        r.id as room_id,
+        r.type AS room_type,
+        r.price AS room_price,
+        COUNT(b.id) AS total_bookings,
+        (r.total_rooms - COUNT(b.id)) AS available_rooms
+      FROM
+        room r
+      JOIN
+        hotel h ON r.hotel_id = h.id
+      LEFT JOIN
+        booking b ON r.id = b.room
+      AND (b.start_date < Now() AND b.end_date > Now())
+      WHERE
+        r.is_available = 1
+      GROUP BY
+        h.id, r.type, r.price
+      HAVING
+        available_rooms > 0;
+
+    `;
+
+    connection.query(qry, (error, result) => {
+      if (error) {
+        console.error('Database query error:', error);
+        return res.status(500).send({ status: false, message: 'Unable to fetch room availability.' });
+      }
+
+      res.send({ status: true, data: result });
+    });
+  });
+
+
 
 
 // Handle and store complaint

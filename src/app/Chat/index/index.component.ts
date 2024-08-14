@@ -1,28 +1,41 @@
-import { CommonModule, NgFor } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-index',
   standalone: true,
-  imports: [CommonModule, NgFor, FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './index.component.html',
   styleUrls: ['./index.component.css']
 })
 export class IndexComponent implements OnInit {
+  bookingStatus: string = '';
+  selectedHotelName: string = '';
+  selectedRoomType: string = '';
+  selectedRoomPrice: number = 0;
   region: string = '';
-  checkInDate: string = '';
-  checkOutDate: string = '';
-  location: string = '';
+  selectedHotel: string = '';
+  selectedRoom: string = '';
+  startDate: string = '';
+  endDate: string = '';
   complaint: string = '';
   currentStep: number = 0;
   userChoice: string = '';
-  isInquiry: boolean = false;
-  inquiryText: string = '';
+  hotels: any[] = [];
+  rooms: any[] = [];
   bookingNumber: string = '';
-  additionalDetails: string = '';
+  countdownActive: boolean = false;
+  days: number = 0;
 
-  messages: { sender: any; text: string }[] = [];
+  messages: {
+    sender: any;
+    text: string;
+    value?: string;
+  }[] = [];
+
+  constructor(private http: HttpClient) {}
 
   ngOnInit() {
     this.messages.push({
@@ -42,122 +55,260 @@ export class IndexComponent implements OnInit {
       this.currentStep = 1;
     } else if (option === 'Complaints/Inquiry') {
       this.messages.push({
-        text: 'You selected Complaints/Inquiry. Click "Yes" for inquiry or "No" for complaints.',
+        text: 'You selected Complaints/Inquiry. Please enter your complaint or inquiry.',
         sender: undefined
       });
       this.currentStep = 5;
     }
   }
 
-  handleYesNo(choice: string) {
-    if (this.currentStep === 5) {
-      this.isInquiry = choice === 'Yes';
-      this.messages.push({
-        text: this.isInquiry ? 'Please enter your inquiry.' : 'Please enter your booking number.',
-        sender: undefined
-      });
-      this.currentStep = 6;
-    }
-  }
-
-  yesNo(choice: string) {
-    if (this.currentStep === 7) {
-      if (this.isInquiry) {
-        this.messages.push({
-          text: choice === 'Yes' ? 'Please provide more details about your inquiry.' : 'Thank you for your prompt response.',
-          sender: undefined
-        });
-      } else {
-        this.messages.push({
-          text: choice === 'Yes' ? 'Please provide more details about your complaint.' : 'Thank you for your prompt response.',
-          sender: undefined
-        });
-      }
-      this.currentStep = 8; // Move to the next step after handling additional details
-    }
-  }
-
   nextStep() {
-    if (this.currentStep === 1 && this.region) {
-      this.messages.push({
-        text: `Region: ${this.region}`,
-        sender: undefined
-      });
-      this.currentStep++;
-    } else if (this.currentStep === 2 && this.checkInDate) {
-      this.messages.push({
-        text: `Check-in date: ${this.checkInDate}`,
-        sender: undefined
-      });
-      this.currentStep++;
-    } else if (this.currentStep === 3 && this.checkOutDate) {
-      this.messages.push({
-        text: `Check-out date: ${this.checkOutDate}`,
-        sender: undefined
-      });
-      this.bookRoom();
-      this.currentStep++;
-    } else if (this.currentStep === 6) {
-      if (this.isInquiry && this.inquiryText) {
-        this.currentStep = 7; // Proceed to the next step if inquiry is entered
-      } else if (!this.isInquiry && this.bookingNumber) {
-        this.currentStep = 7; // Proceed to the next step if booking number is entered
-      }
-    } else if (this.currentStep === 8) {
-      if (this.isInquiry && this.inquiryText) {
-        this.submitInquiry();
-      } else if (!this.isInquiry && this.bookingNumber) {
-        this.submitComplaint();
-      }
+    console.log('Current Step:', this.currentStep);
+
+    switch (this.currentStep) {
+      case 1:
+        if (this.region) {
+          this.messages.push({
+            text: 'Please select the start and end date',
+            sender: 'bot'
+          });
+          this.currentStep = 2;
+        }
+        break;
+      case 2:
+        if (this.startDate && this.endDate) {
+          // Call both fetch Hotels and CalculateDays method
+          this.calculateDays();
+          this.fetchHotels();
+          this.currentStep = 3;
+        }
+        break;
+      case 3:
+        this.fetchRooms();
+        this.currentStep = 4;
+        break;
+      case 4:
+        if (this.userChoice === 'Booking') {
+          this.generateBookingNumber();
+          this.currentStep = 5;
+          this.messages.push({
+            text: 'Please review your booking details.',
+            sender: 'bot'
+          });
+        } else if (this.userChoice === 'Complaints/Inquiry') {
+          this.submitComplaint();
+          this.currentStep = 6;
+          this.messages.push({
+            text: 'Your complaint has been submitted. We will get back to you shortly.',
+            sender: 'bot'
+          });
+        }
+        break;
+      case 5:
+        this.bookRoom();
+        break;
     }
+
+    console.log('New Step:', this.currentStep);
+  }
+
+  calculateDays() {
+    const startDate = new Date(this.startDate);
+    const endDate = new Date(this.endDate);
+
+    // Calculate the interval in days
+    const timeDifference = endDate.getTime() - startDate.getTime();
+    this.days = Math.round(timeDifference / (1000 * 3600 * 24));
+  }
+
+  fetchHotels() {
+    const regionName = encodeURIComponent(this.region);
+
+    this.http.get(`http://localhost:3000/region?name=${regionName}`).subscribe(
+      (response: any) => {
+        if (response.status) {
+          this.hotels = response.data;
+          if (this.hotels.length > 0) {
+            this.messages.push({
+              text: 'Please select a hotel from the list:',
+              sender: 'bot'
+            });
+            this.currentStep = 3;
+          } else {
+            this.messages.push({
+              text: 'No hotels available in this region.',
+              sender: 'bot'
+            });
+          }
+        } else {
+          this.messages.push({
+            text: 'Failed to fetch hotels. Please try again later.',
+            sender: 'bot'
+          });
+        }
+      },
+      error => {
+        console.error('API Error:', error);
+        this.messages.push({
+          text: 'An error occurred while fetching hotels. Please try again later.',
+          sender: 'bot'
+        });
+      }
+    );
+  }
+
+  fetchRooms() {
+    this.http.get(`http://localhost:3000/rooms?hotel_id=${this.selectedHotel}`).subscribe(
+      (response: any) => {
+        if (response.status) {
+          this.rooms = response.data;
+          this.messages.push({
+            text: 'Please select a room type:',
+            sender: 'bot'
+          });
+          this.currentStep = 4;
+        } else {
+          this.messages.push({
+            text: 'Failed to fetch rooms. Please try again later.',
+            sender: 'bot'
+          });
+        }
+      },
+      error => {
+        console.error('API Error:', error);
+        this.messages.push({
+          text: 'An error occurred while fetching rooms. Please try again later.',
+          sender: 'bot'
+        });
+      }
+    );
+  }
+
+  selectHotel(hotelId: string) {
+    this.selectedHotel = hotelId;
+    const selectedHotel = this.hotels.find(h => h.id === hotelId);
+    this.selectedHotelName = selectedHotel ? selectedHotel.name : '';
+    this.messages.push({
+      text: `Hotel selected: ${this.selectedHotelName}`,
+      sender: 'user'
+    });
+    this.nextStep();
+  }
+
+  selectRoom(roomId: string) {
+    this.selectedRoom = roomId;
+    const selectedRoom = this.rooms.find(r => r.id === roomId);
+    if (selectedRoom) {
+      this.selectedRoomType = selectedRoom.type;
+      this.selectedRoomPrice = selectedRoom.price;
+      this.messages.push({
+        text: `Room selected: ${this.selectedRoomType} - $${this.selectedRoomPrice}`,
+        sender: 'user'
+      });
+    }
+    this.nextStep();
+  }
+
+  generateBookingNumber() {
+    const randomNum = Math.floor(Math.random() * 10000) + 1;
+    this.bookingNumber = `BK${randomNum}`;
   }
 
   bookRoom() {
-    this.messages.push({
-      text: `Booking room at ${this.checkInDate}, ${this.checkOutDate}, ${this.region}`,
-      sender: undefined
-    });
-    this.messages.push({
-      text: 'Thank you for booking with us!',
-      sender: undefined
-    });
-  }
+    // First, get the region ID from the region name
+    this.http.get(`http://localhost:3000/region/id?name=${this.region}`).subscribe((response: any) => {
+      if (response.status) {
+        // Proceed with the booking using the region ID
+        const regionId = response.data;
 
-  submitInquiry() {
-    this.messages.push({
-      text: `Your inquiry: ${this.inquiryText}`,
-      sender: undefined
+        // Now make the booking request
+        this.http.post(`http://localhost:3000/booking/create`, {
+          room: this.selectedRoom,
+          duration: this.days,
+          hotel_id: this.selectedHotel,
+          region_id: regionId,
+          book_no: this.bookingNumber,
+          start_date: this.startDate,
+          end_date: this.endDate
+        }).subscribe((response: any) => {
+          if (response.status) {
+            this.bookingStatus = 'success';
+            this.messages.push({
+              text: `Booking confirmed at ${this.selectedHotelName}. Your booking number is ${this.bookingNumber}.`,
+              sender: 'bot'
+            });
+          } else {
+            this.bookingStatus = 'failed';
+            this.messages.push({
+              text: 'Booking failed. Please try again.',
+              sender: 'bot'
+            });
+          }
+          this.startCountdown(); // Start the countdown
+        }, error => {
+          console.error('Booking error:', error);
+          this.bookingStatus = 'error';
+          this.messages.push({
+            text: 'An error occurred while booking. Please try again later.',
+            sender: 'bot'
+          });
+          this.startCountdown(); // Start the countdown
+        });
+      } else {
+        console.error('Error fetching region ID:', response.message);
+        this.bookingStatus = 'error';
+        this.messages.push({
+          text: 'Error fetching region ID. Please try again.',
+          sender: 'bot'
+        });
+      }
+    }, error => {
+      console.error('Error fetching region ID:', error);
+      this.bookingStatus = 'error';
+      this.messages.push({
+        text: 'An error occurred while fetching region ID. Please try again later.',
+        sender: 'bot'
+      });
     });
-    this.messages.push({
-      text: 'Thank you for your inquiry. We will respond shortly.',
-      sender: undefined
-    });
-    this.resetChat();
   }
 
   submitComplaint() {
-    this.messages.push({
-      text: `Your booking number: ${this.bookingNumber}`,
-      sender: undefined
+    this.http.post(`http://localhost:3000/complaint/create`, { complaint: this.complaint }).subscribe((response: any) => {
+      if (response.status) {
+        this.messages.push({
+          text: response.message,
+          sender: 'bot'
+        });
+      } else {
+        this.messages.push({
+          text: 'Failed to submit your complaint. Please try again later.',
+          sender: 'bot'
+        });
+      }
+      this.startCountdown(); // Start the countdown
+    }, error => {
+      console.error('Complaint error:', error);
+      this.messages.push({
+        text: 'An error occurred while submitting your complaint. Please try again later.',
+        sender: 'bot'
+      });
+      this.startCountdown(); // Start the countdown
     });
-    this.messages.push({
-      text: 'Thank you for your complaint. We will investigate and get back to you soon.',
-      sender: undefined
-    });
-    this.resetChat();
   }
 
-  resetChat() {
-    this.currentStep = 0;
-    this.region = '';
-    this.checkInDate = '';
-    this.checkOutDate = '';
-    this.location = '';
-    this.complaint = '';
-    this.userChoice = '';
-    this.isInquiry = false;
-    this.inquiryText = '';
-    this.bookingNumber = '';
-    this.additionalDetails = '';
+  startCountdown() {
+    this.countdownActive = true;
+    let seconds = 5;
+    const countdown = setInterval(() => {
+      this.days = seconds--;
+      if (seconds < 0) {
+        clearInterval(countdown);
+        this.countdownActive = false;
+        this.messages.push({
+          text: 'The process is complete. Thank you for your patience.',
+          sender: 'bot'
+        });
+      }
+    }, 1000);
   }
 }

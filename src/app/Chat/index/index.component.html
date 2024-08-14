@@ -6,7 +6,7 @@
           <h2 class="card-title text-center mb-4">Welcome to Hotel Chatting System</h2>
 
           <div class="chat-container">
-            <div class="message d-flex position-relative text-sm"
+            <div class="message d-flex position-relative"
                   *ngFor="let message of messages"
                   [ngClass]="{'justify-content-start': message.sender === 'bot', 'justify-content-end': message.sender === 'user'}">
                 <div class="message-content rounded mb-3 position-relative"

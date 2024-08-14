@@ -68,7 +68,6 @@ export class IndexComponent implements OnInit {
     switch (this.currentStep) {
       case 1:
         if (this.region) {
-          console.log(this.startDate + " " + this.endDate);
           this.messages.push({
             text: 'Please select the start and end date',
             sender: undefined
@@ -78,6 +77,8 @@ export class IndexComponent implements OnInit {
         break;
       case 2:
         if (this.startDate && this.endDate) {
+          //Call both fetch Hotels and CalculateDays method
+          this.calculateDays();
           this.fetchHotels();
           this.currentStep = 3;
         }
@@ -87,37 +88,34 @@ export class IndexComponent implements OnInit {
         this.currentStep = 4;
         break;
       case 4:
-          this.generateBookingNumber();
-          this.currentStep = 5;
-          this.messages.push({
-            text: 'Please review your booking details.',
-            sender: 'bot'
-          });
+        this.generateBookingNumber();
+        this.currentStep = 5;
+        this.messages.push({
+          text: 'Please review your booking details.',
+          sender: 'bot'
+        });
         break;
     }
 
     console.log('New Step:', this.currentStep);
   }
 
-  fetchHotels() {
-    const regionId = encodeURIComponent(this.region);
-
+  calculateDays() {
     const startDate = new Date(this.startDate);
     const endDate = new Date(this.endDate);
 
-  // Calculate the interval in days
-  const timeDifference = endDate.getTime() - startDate.getTime();
-  const daysDifference = Math.round(timeDifference / (1000 * 3600 * 24));
-  const interval = encodeURIComponent(daysDifference);
+    // Calculate the interval in days
+    const timeDifference = endDate.getTime() - startDate.getTime();
+    this.days = Math.round(timeDifference / (1000 * 3600 * 24));
+  }
 
-  this.days = daysDifference;
+  fetchHotels() {
+    const regionName = encodeURIComponent(this.region);
 
-    this.http.get(`http://localhost:3000/hotel?region_id=${regionId}&duration=${interval}`).subscribe(
-
+    this.http.get(`http://localhost:3000/region?name=${regionName}`).subscribe(
       (response: any) => {
         if (response.status) {
           this.hotels = response.data;
-          // console.log(response.data)
           if (this.hotels.length > 0) {
             this.messages.push({
               text: 'Please select a hotel from the list:',
@@ -146,6 +144,7 @@ export class IndexComponent implements OnInit {
       }
     );
   }
+
 
   fetchRooms() {
     this.http.get(`http://localhost:3000/rooms?hotel_id=${this.selectedHotel}`).subscribe(
@@ -205,37 +204,60 @@ export class IndexComponent implements OnInit {
   }
 
   bookRoom() {
-    this.http.post(`http://localhost:3000/booking/create`, {
-      room: this.selectedRoom,
-      duration: this.days,
-      hotel_id: this.selectedHotel,
-      region_id: this.region,
-      book_no: this.bookingNumber,
-      start_date: this.startDate,
-      end_date: this.endDate
-    }).subscribe((response: any) => {
+    // First, get the region ID from the region name
+    this.http.get(`http://localhost:3000/region/id?name=${this.region}`).subscribe((response: any) => {
       if (response.status) {
-        this.bookingStatus = 'success';
-        this.messages.push({
-          text: `Booking confirmed at ${this.selectedHotelName}. Your booking number is ${this.bookingNumber}.`,
-          sender: 'bot'
+        // Proceed with the booking using the region ID
+        const regionId = response.data;
+
+        // Now make the booking request
+        this.http.post(`http://localhost:3000/booking/create`, {
+          room: this.selectedRoom,
+          duration: this.days,
+          hotel_id: this.selectedHotel,
+          region_id: regionId,
+          book_no: this.bookingNumber,
+          start_date: this.startDate,
+          end_date: this.endDate
+        }).subscribe((response: any) => {
+          if (response.status) {
+            this.bookingStatus = 'success';
+            this.messages.push({
+              text: `Booking confirmed at ${this.selectedHotelName}. Your booking number is ${this.bookingNumber}.`,
+              sender: 'bot'
+            });
+          } else {
+            this.bookingStatus = 'failed';
+            this.messages.push({
+              text: 'Booking failed. Please try again.',
+              sender: 'bot'
+            });
+          }
+          this.startCountdown(); // Start the countdown
+        }, error => {
+          console.error('Booking error:', error);
+          this.bookingStatus = 'error';
+          this.messages.push({
+            text: 'An error occurred while booking. Please try again later.',
+            sender: 'bot'
+          });
+          this.startCountdown(); // Start the countdown
         });
       } else {
-        this.bookingStatus = 'failed';
+        console.error('Error fetching region ID:', response.message);
+        this.bookingStatus = 'error';
         this.messages.push({
-          text: 'Booking failed. Please try again.',
+          text: 'Error fetching region ID. Please try again.',
           sender: 'bot'
         });
       }
-      this.startCountdown(); // Start the countdown
     }, error => {
-      console.error('Booking error:', error);
+      console.error('Error fetching region ID:', error);
       this.bookingStatus = 'error';
       this.messages.push({
-        text: 'An error occurred while booking. Please try again later.',
+        text: 'An error occurred while fetching region ID. Please try again later.',
         sender: 'bot'
       });
-      this.startCountdown(); // Start the countdown
     });
   }
 

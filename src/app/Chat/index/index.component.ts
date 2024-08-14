@@ -17,7 +17,7 @@ export class IndexComponent implements OnInit {
   selectedRoomPrice: number = 0;
   region: string = '';
   selectedHotel: string = '';
-  selectedRoom: string = '';
+  selectedRoom: number = 0;
   startDate: string = '';
   endDate: string = '';
   complaint: string = '';
@@ -28,6 +28,7 @@ export class IndexComponent implements OnInit {
   bookingNumber: string = '';
   countdownActive: boolean = false;
   days: number = 0;
+  regionName: string = '';
 
   messages: {
     sender: any;
@@ -77,28 +78,31 @@ export class IndexComponent implements OnInit {
         break;
       case 2:
         if (this.startDate && this.endDate) {
-          //Call both fetch Hotels and CalculateDays method
           this.calculateDays();
           this.fetchHotels();
-          this.currentStep = 3;
+          this.currentStep = 3; // Set to 3 to fetch and select hotel
         }
         break;
       case 3:
-        this.fetchRooms();
-        this.currentStep = 4;
+        if (this.selectedHotel) {
+          this.fetchRooms(); // Fetch rooms for the selected hotel
+
+          this.currentStep = 4; // Move to room selection step
+        }
         break;
       case 4:
         this.generateBookingNumber();
-        this.currentStep = 5;
         this.messages.push({
           text: 'Please review your booking details.',
           sender: 'bot'
         });
+        this.currentStep = 5;
         break;
     }
 
     console.log('New Step:', this.currentStep);
   }
+
 
   calculateDays() {
     const startDate = new Date(this.startDate);
@@ -110,21 +114,24 @@ export class IndexComponent implements OnInit {
   }
 
   fetchHotels() {
-    const regionName = encodeURIComponent(this.region);
+    const startDate = encodeURIComponent(this.startDate);
+    const endDate = encodeURIComponent(this.endDate);
 
-    this.http.get(`http://localhost:3000/region?name=${regionName}`).subscribe(
+    this.http.get(`http://localhost:3000/available?start_date=${startDate}&end_date=${endDate}`).subscribe(
       (response: any) => {
+        console.log('API Response:', response); // Log the entire response
         if (response.status) {
-          this.hotels = response.data;
+          // Transform the response data
+          this.hotels = this.groupRoomsByHotel(response.data);
+          console.log('Transformed Hotels:', this.hotels); // Log the transformed hotels
           if (this.hotels.length > 0) {
             this.messages.push({
               text: 'Please select a hotel from the list:',
               sender: 'bot'
             });
-            this.currentStep = 3;
           } else {
             this.messages.push({
-              text: 'No hotels available in this region.',
+              text: 'No hotels available for the selected dates.',
               sender: 'bot'
             });
           }
@@ -147,6 +154,8 @@ export class IndexComponent implements OnInit {
 
 
   fetchRooms() {
+    if (!this.selectedHotel) return;
+
     this.http.get(`http://localhost:3000/rooms?hotel_id=${this.selectedHotel}`).subscribe(
       (response: any) => {
         if (response.status) {
@@ -173,30 +182,81 @@ export class IndexComponent implements OnInit {
     );
   }
 
+
+groupRoomsByHotel(data: any[]) {
+  const groupedHotels: any[] = [];
+  console.log("Data zetu", data);
+  data.forEach(item => {
+    let hotel = groupedHotels.find(h => h.hotel_id === item.hotel_id);
+    if (!hotel) {
+      hotel = {
+
+        hotel_id: item.hotel_id,
+        hotel_name: item.hotel_name,
+        rooms: []
+      };
+      groupedHotels.push(hotel);
+    }
+    hotel.rooms.push({
+      id: item.room_id, // room id for specific hotel
+      type: item.room_type,
+      price: item.room_price,
+      available_rooms: item.available_rooms
+    });
+  });
+
+  return groupedHotels;
+}
+
+
   selectHotel(hotelId: string) {
     this.selectedHotel = hotelId;
-    const selectedHotel = this.hotels.find(h => h.id === hotelId);
-    this.selectedHotelName = selectedHotel ? selectedHotel.name : '';
+    const selectedHotel = this.hotels.find(h => h.hotel_id === hotelId);
+    this.selectedHotelName = selectedHotel ? selectedHotel.hotel_name : '';
     this.messages.push({
       text: `Hotel selected: ${this.selectedHotelName}`,
       sender: 'user'
     });
-    this.nextStep();
+    this.nextStep(); // Proceed to next step after selecting hotel
   }
 
-  selectRoom(roomId: string) {
-    this.selectedRoom = roomId;
-    const selectedRoom = this.rooms.find(r => r.id === roomId);
+  selectRoom(roomId: number) {
+    if (!this.selectedHotel) {
+      console.error('No hotel selected.');
+      return;
+    }
+
+    // Find the selected hotel
+    const selectedHotel = this.hotels.find(h => h.hotel_id === this.selectedHotel);
+    if (!selectedHotel) {
+      console.error('Selected hotel not found.');
+      return;
+    }
+
+    // Find the selected room
+    const selectedRoom = selectedHotel.rooms.find((r: { id: number; }) => r.id === roomId); // Ensure the ID matches the property
     if (selectedRoom) {
+      this.selectedRoom = selectedRoom.id;
       this.selectedRoomType = selectedRoom.type;
       this.selectedRoomPrice = selectedRoom.price;
+
+      console.log('Selected Room:', selectedRoom.id); // Debugging line
+
       this.messages.push({
         text: `Room selected: ${this.selectedRoomType} - $${this.selectedRoomPrice}`,
         sender: 'user'
       });
+
+      this.nextStep(); // Proceed to the next step
+    } else {
+      console.error('Room not found.');
     }
-    this.nextStep();
   }
+
+
+
+
+
 
   generateBookingNumber() {
     const randomNum = Math.floor(Math.random() * 10000) + 1;
@@ -204,13 +264,21 @@ export class IndexComponent implements OnInit {
   }
 
   bookRoom() {
-    // First, get the region ID from the region name
+    console.log('Booking Details:', {
+      room: this.selectedRoom,
+      duration: this.days,
+      hotel_id: this.selectedHotel,
+      region_id: this.regionName, // Ensure this is correct
+      book_no: this.bookingNumber,
+      start_date: this.startDate,
+      end_date: this.endDate
+    });
+
     this.http.get(`http://localhost:3000/region/id?name=${this.region}`).subscribe((response: any) => {
       if (response.status) {
-        // Proceed with the booking using the region ID
         const regionId = response.data;
+        this.regionName = response.name;
 
-        // Now make the booking request
         this.http.post(`http://localhost:3000/booking/create`, {
           room: this.selectedRoom,
           duration: this.days,
@@ -233,7 +301,7 @@ export class IndexComponent implements OnInit {
               sender: 'bot'
             });
           }
-          this.startCountdown(); // Start the countdown
+          this.startCountdown();
         }, error => {
           console.error('Booking error:', error);
           this.bookingStatus = 'error';
@@ -241,7 +309,7 @@ export class IndexComponent implements OnInit {
             text: 'An error occurred while booking. Please try again later.',
             sender: 'bot'
           });
-          this.startCountdown(); // Start the countdown
+          this.startCountdown();
         });
       } else {
         console.error('Error fetching region ID:', response.message);
@@ -260,6 +328,7 @@ export class IndexComponent implements OnInit {
       });
     });
   }
+
 
   submitComplaint() {
     this.http.post(`http://localhost:3000/complaint/create`, { complaint: this.complaint }).subscribe((response: any) => {
@@ -285,7 +354,7 @@ export class IndexComponent implements OnInit {
     this.currentStep = 0;
     this.region = '';
     this.selectedHotel = '';
-    this.selectedRoom = '';
+    this.selectedRoom = 0;
     this.startDate = '';
     this.endDate = '';
     this.complaint = '';

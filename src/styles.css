@@ -52,3 +52,62 @@
 .card-body {
   border: none; /* Remove card body border */
 }
+
+.message-content {
+  max-width: 70%;
+  padding: 10px 15px;
+  position: relative;
+  border-radius: 18px;
+}
+
+.bot-message {
+  background-color: #f0f0f0;
+  color: #000;
+  margin-left: 12px;
+}
+
+.user-message {
+  background-color: #007bff;
+  color: #fff;
+  margin-right: 12px;
+}
+
+.bot-message::before,
+.user-message::before {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  width: 12px;
+  height: 20px;
+}
+
+.bot-message::before {
+  left: -10px;
+  border-bottom-right-radius: 16px 14px;
+  box-shadow: 6px 0 0 0 #f0f0f0;
+}
+
+.user-message::before {
+  right: -10px;
+  border-bottom-left-radius: 16px 14px;
+  box-shadow: -6px 0 0 0 #007bff;
+}
+
+.bot-message::after,
+.user-message::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  width: 10px;
+  height: 20px;
+  background-color: #fff;
+  z-index: -1;
+}
+
+.bot-message::after {
+  left: -10px;
+}
+
+.user-message::after {
+  right: -10px;
+}

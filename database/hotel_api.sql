@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 14, 2024 at 03:13 PM
+-- Generation Time: Aug 15, 2024 at 08:39 AM
 -- Server version: 10.4.25-MariaDB
 -- PHP Version: 8.1.10
 
@@ -123,8 +123,7 @@ CREATE TABLE `complain` (
 CREATE TABLE `complaints` (
   `complaint_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
-  `booking_id` int(11) DEFAULT NULL,
-  `hotel_id` int(11) DEFAULT NULL,
+  `booking_id` varchar(100) DEFAULT NULL,
   `complaint_text` text NOT NULL,
   `status` varchar(50) DEFAULT 'Pending',
   `created_at` datetime DEFAULT current_timestamp(),
@@ -287,7 +286,6 @@ ALTER TABLE `complain`
 ALTER TABLE `complaints`
   ADD PRIMARY KEY (`complaint_id`),
   ADD KEY `booking_id` (`booking_id`),
-  ADD KEY `hotel_id` (`hotel_id`),
   ADD KEY `user_id` (`user_id`);
 
 --
@@ -402,14 +400,14 @@ ALTER TABLE `users`
 -- Constraints for table `anscomp`
 --
 ALTER TABLE `anscomp`
-  ADD CONSTRAINT `anscomp_ibfk_1` FOREIGN KEY (`type_id`) REFERENCES `typeofcomp` (`id`);
+  ADD CONSTRAINT `anscomp_ibfk_1` FOREIGN KEY (`type_id`) REFERENCES `typeofcomp` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `booking`
 --
 ALTER TABLE `booking`
-  ADD CONSTRAINT `booking_ibfk_1` FOREIGN KEY (`region_id`) REFERENCES `region` (`id`),
-  ADD CONSTRAINT `booking_ibfk_2` FOREIGN KEY (`hotel_id`) REFERENCES `hotel` (`id`),
+  ADD CONSTRAINT `booking_ibfk_1` FOREIGN KEY (`region_id`) REFERENCES `region` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `booking_ibfk_2` FOREIGN KEY (`hotel_id`) REFERENCES `hotel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `room` FOREIGN KEY (`room`) REFERENCES `room` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
@@ -422,27 +420,25 @@ ALTER TABLE `complain`
 -- Constraints for table `complaints`
 --
 ALTER TABLE `complaints`
-  ADD CONSTRAINT `complaints_ibfk_1` FOREIGN KEY (`booking_id`) REFERENCES `booking` (`id`),
-  ADD CONSTRAINT `complaints_ibfk_2` FOREIGN KEY (`hotel_id`) REFERENCES `hotel` (`id`),
   ADD CONSTRAINT `complaints_ibfk_3` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
 
 --
 -- Constraints for table `hotel`
 --
 ALTER TABLE `hotel`
-  ADD CONSTRAINT `hotel_ibfk_1` FOREIGN KEY (`region_id`) REFERENCES `region` (`id`);
+  ADD CONSTRAINT `hotel_ibfk_1` FOREIGN KEY (`region_id`) REFERENCES `region` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `location`
 --
 ALTER TABLE `location`
-  ADD CONSTRAINT `location_ibfk_1` FOREIGN KEY (`region_id`) REFERENCES `region` (`id`);
+  ADD CONSTRAINT `location_ibfk_1` FOREIGN KEY (`region_id`) REFERENCES `region` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `room`
 --
 ALTER TABLE `room`
-  ADD CONSTRAINT `room_ibfk_1` FOREIGN KEY (`hotel_id`) REFERENCES `hotel` (`id`);
+  ADD CONSTRAINT `room_ibfk_1` FOREIGN KEY (`hotel_id`) REFERENCES `hotel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

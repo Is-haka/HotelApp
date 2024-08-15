@@ -111,35 +111,35 @@ server.post("/region/create", (req,res)=>{
                 // Server Modification search region by name
                // modificatio search through region name
 
-  server.get('/region', (req, res) => {
-  const regionName = req.query.name;
+               server.get('/region', (req, res) => {
+                const regionName = req.query.name;
 
-  if (!regionName) {
-    return res.status(400).send({ status: false, message: 'Region name is required' });
-  }
+                if (!regionName) {
+                  return res.status(400).send({ status: false, message: 'Region name is required' });
+                }
 
-  // Query to fetch hotels based on region name by joining two tables: region and hotel
-  const query = `
-    SELECT h.id, h.name, h.address, h.contact_info, r.name AS regionName
-    FROM hotel h
-    JOIN region r ON h.region_id = r.id
-    WHERE r.name LIKE CONCAT('%', ?, '%')
-  `;
-  const searchTerm = `%${regionName}%`; // Use % as wildcard for partial matching
+                // Query to fetch hotels based on exact region name by joining two tables: region and hotel
+                const query = `
+                  SELECT h.id, h.name, h.address, h.contact_info, r.name AS regionName
+                  FROM hotel h
+                  JOIN region r ON h.region_id = r.id
+                  WHERE r.name = ?
+                `;
 
-  connection.query(query, [searchTerm], (error, results) => {
-    if (error) {
-      console.error('Database query error:', error);
-      return res.status(500).send({ status: false, message: 'An error occurred while searching for hotels' });
-    }
+                connection.query(query, [regionName], (error, results) => {
+                  if (error) {
+                    console.error('Database query error:', error);
+                    return res.status(500).send({ status: false, message: 'An error occurred while searching for hotels' });
+                  }
 
-    if (results.length > 0) {
-      res.send({ status: true, data: results });
-    } else {
-      res.send({ status: false, message: 'No hotels found for the specified region' });
-    }
-  });
-  });
+                  if (results.length > 0) {
+                    res.send({ status: true, data: results });
+                  } else {
+                    res.send({ status: false, message: 'No hotels found for the specified region' });
+                  }
+                });
+              });
+
 
 //************************************************************************************************* */
 
@@ -254,42 +254,36 @@ server.get("/booking", (req,res) => {
 
   // API endpoint to get total bookings and available rooms for each hotel and room type
   server.get("/available", (req, res) => {
-    const startDate = req.query.start_date;
-    const endDate = req.query.end_date;
+    const region_id = req.query.region_id;
 
-    if (!startDate || !endDate) {
-      return res.status(400).send({ status: false, message: 'Start date and end date are required.' });
-    }
-    /*
-    * This endpoint here return the available rooms for each hotel, their price for each type of rooms
-    *
-    */
+    // SQL query to fetch available hotels and rooms
     const qry = `
       SELECT
         h.id AS hotel_id,
         h.name AS hotel_name,
-        r.id as room_id,
+        r.id AS room_id,
         r.type AS room_type,
         r.price AS room_price,
-        COUNT(b.id) AS total_bookings,
-        (r.total_rooms - COUNT(b.id)) AS available_rooms
+        (r.total_rooms - COALESCE(COUNT(b.id), 0)) AS available_rooms
       FROM
         room r
       JOIN
         hotel h ON r.hotel_id = h.id
       LEFT JOIN
         booking b ON r.id = b.room
-      AND (b.start_date < Now() AND b.end_date > Now())
+        AND (b.start_date < now() AND b.end_date > now())
       WHERE
         r.is_available = 1
+        AND h.region_id = ?
       GROUP BY
-        h.id, r.type, r.price
+        h.id, r.id, r.type, r.price
       HAVING
         available_rooms > 0;
-
     `;
 
-    connection.query(qry, (error, result) => {
+    //removed start_date and end_date and added region_id
+
+    connection.query(qry, [region_id], (error, result) => {
       if (error) {
         console.error('Database query error:', error);
         return res.status(500).send({ status: false, message: 'Unable to fetch room availability.' });
@@ -298,6 +292,7 @@ server.get("/booking", (req,res) => {
       res.send({ status: true, data: result });
     });
   });
+
 
 
 

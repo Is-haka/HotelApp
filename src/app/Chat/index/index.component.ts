@@ -1,16 +1,21 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-index',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './index.component.html',
   styleUrls: ['./index.component.css']
 })
 export class IndexComponent implements OnInit {
+  userForm!: FormGroup;
+
+
+
   bookingStatus: string = '';
   selectedHotelName: string = '';
   selectedRoomType: string = '';
@@ -36,13 +41,28 @@ export class IndexComponent implements OnInit {
     value?: string;
   }[] = [];
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private user_form: FormBuilder) {}
 
   ngOnInit() {
-    this.messages.push({
-      text: 'Welcome! Please choose an option to proceed.',
-      sender: undefined
+    this.userForm = this.user_form.group({
+      region: ['', [Validators.required, Validators.minLength(4)]],
+      startDate: ['', [Validators.required, this.dateValidator()]],
+      endDate: ['', [Validators.required, this.dateValidator()]]
     });
+  }
+
+  dateValidator() {
+    return (control: AbstractControl): {[key: string]: any} | null => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const inputDate = new Date(control.value);
+      inputDate.setHours(0, 0, 0, 0);
+
+      if (inputDate < today) {
+        return { 'pastDate': true };
+      }
+      return null;
+    };
   }
 
   chooseOption(option: string) {
@@ -68,40 +88,79 @@ export class IndexComponent implements OnInit {
 
     switch (this.currentStep) {
       case 1:
-        if (this.region) {
+        if (this.userForm.get('region')?.valid) {
+          // Proceed to next step
+          console.log('Region is valid:', this.userForm.get('region')?.value);
+          this.currentStep = 2; // Move to Step 2
           this.messages.push({
-            text: 'Please select the start and end date',
+            text: 'Please enter the start and end date.',
             sender: 'bot'
           });
-          this.currentStep = 2;
+        } else {
+          // Show error message
+          console.log('Please enter a valid region');
+          this.messages.push({
+            text: 'Please enter a valid region before proceeding.',
+            sender: 'bot'
+          });
         }
         break;
+
       case 2:
-        if (this.startDate && this.endDate) {
-          this.calculateDays();
-          this.fetchHotels();
-          this.currentStep = 3; // Set to 3 to fetch and select hotel
+        // Retrieve date values from form controls
+        const startDate = this.userForm.get('startDate')?.value;
+        const endDate = this.userForm.get('endDate')?.value;
+
+        if (startDate && endDate) {
+          this.startDate = startDate; // Set class properties
+          this.endDate = endDate;
+
+          if (this.userForm.get('startDate')?.valid && this.userForm.get('endDate')?.valid) {
+            this.calculateDays();
+            this.fetchHotels();
+            this.currentStep = 3; // Move to Step 3
+          } else {
+            console.log('Please enter valid dates');
+            this.messages.push({
+              text: 'Please enter valid start and end dates before proceeding.',
+              sender: 'bot'
+            });
+          }
+        } else {
+          console.log('Start date and end date are required');
+          this.messages.push({
+            text: 'Start date and end date are required.',
+            sender: 'bot'
+          });
         }
         break;
+
       case 3:
         if (this.selectedHotel) {
           this.fetchRooms(); // Fetch rooms for the selected hotel
-
-          this.currentStep = 4; // Move to room selection step
+          this.currentStep = 4; // Move to Step 4
+        } else {
+          console.log('Please select a hotel');
+          this.messages.push({
+            text: 'Please select a hotel before proceeding.',
+            sender: 'bot'
+          });
         }
         break;
+
       case 4:
         this.generateBookingNumber();
         this.messages.push({
           text: 'Please review your booking details.',
           sender: 'bot'
         });
-        this.currentStep = 5;
+        this.currentStep = 5; // Move to Step 5
         break;
     }
 
     console.log('New Step:', this.currentStep);
   }
+
 
 
   calculateDays() {
@@ -275,9 +334,11 @@ groupRoomsByHotel(data: any[]) {
     });
 
     this.http.get(`http://localhost:3000/region/id?name=${this.region}`).subscribe((response: any) => {
+      console.log(this.region);
       if (response.status) {
         const regionId = response.data;
         this.regionName = response.name;
+        console.log(this.regionName);
 
         this.http.post(`http://localhost:3000/booking/create`, {
           room: this.selectedRoom,

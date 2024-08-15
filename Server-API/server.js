@@ -212,7 +212,7 @@ server.get('/region/id', (req, res) => {
 server.post("/booking/create", (req, res) => {
   let details = {
     firstname: req.body.firstname,
-    lastnname: req.body.lastname,
+    lastname: req.body.lastname,
     email: req.body.email,
     room: req.body.room,
     duration: req.body.duration,

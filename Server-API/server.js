@@ -211,6 +211,9 @@ server.get('/region/id', (req, res) => {
 //post api for booking for create
 server.post("/booking/create", (req, res) => {
   let details = {
+    firstname: req.body.firstname,
+    lastname: req.body.lastname,
+    email: req.body.email,
     room: req.body.room,
     duration: req.body.duration,
     hotel_id: req.body.hotel_id,

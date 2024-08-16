@@ -43,19 +43,27 @@
             </div>
             <!-- Booking process -->
             <div *ngIf="userChoice === 'Booking'" class="mt-4">
-              <!-- ************************************************************** -->
-              <!-- Step 1: Enter Region -->
-              <div *ngIf="currentStep === 1" class="mb-3">
-                <!-- Input field for live region search -->
-                <input
-                  type="text"
-                  class="form-control form-control-sm"
-                  placeholder="Enter Region"
-                  [(ngModel)]="region"
-                  (input)="searchRegion($event)"
-                  (keyup.enter)="nextStep()"
-                />
-
+              <form [formGroup]="userForm" class="needs-validation" novalidate>
+                <!-- Step 1: Enter Region -->
+                <div *ngIf="currentStep === 1" class="mb-3">
+                  <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    [ngClass]="{
+                      'is-invalid': userForm.get('region')?.invalid && (userForm.get('region')?.dirty || userForm.get('region')?.touched),
+                      'is-valid': userForm.get('region')?.valid && (userForm.get('region')?.dirty || userForm.get('region')?.touched)
+                    }"
+                    placeholder="Enter Region"
+                    formControlName="region"
+                    (input)="searchRegion($event)"
+                    (keyup.enter)="nextStep()"
+                    required
+                  />
+                  <div class="invalid-feedback">
+                    <div *ngIf="userForm.get('region')?.errors?.['required']">Region is required.</div>
+                    <div *ngIf="userForm.get('region')?.errors?.['minlength']">Region must be at least 4 characters long.</div>
+                  </div>
+                  
                 <!-- Dropdown for displaying filtered region suggestions -->
                 <ul *ngIf="filteredRegions.length > 0" class="list-group mt-2">
                   <li *ngFor="let region of filteredRegions"
@@ -64,31 +72,60 @@
                       {{ region.name }}
                   </li>
                 </ul>
-                <!-- Next button to proceed to the next step -->
-                <button class="btn btn-sm btn-primary mt-2" (click)="nextStep()">Next</button>
-              </div>
-              <!-- ***************************************************** -->
+                  <button class="btn btn-sm btn-primary mt-2" [disabled]="userForm.get('region')?.invalid" (click)="nextStep()">Next</button>
+                </div>
 
-              <!-- Step 2: Enter Dates -->
-              <div *ngIf="currentStep === 2" class="mb-3">
-                <label for="startDate" class="form-label">Start Date</label>
-                <input
-                  type="date"
-                  id="startDate"
-                  class="form-control form-control-sm"
-                  [(ngModel)]="startDate"
-                />
-                <label for="endDate" class="form-label mt-3">End Date</label>
-                <input
-                  type="date"
-                  id="endDate"
-                  class="form-control form-control-sm"
-                  [(ngModel)]="endDate"
-                />
-                <button class="btn btn-sm btn-primary mt-2" (click)="nextStep()">Next</button>
-              </div>
+                <!-- Step 2: Enter Dates -->
+                <div *ngIf="currentStep === 2" class="mb-3">
+                  <label for="startDate" class="form-label">Start Date</label>
+                  <input
+                    type="date"
+                    id="startDate"
+                    class="form-control form-control-sm"
+                    [ngClass]="{'is-invalid': userForm.get('startDate')?.invalid && (userForm.get('startDate')?.dirty || userForm.get('startDate')?.touched),
+                      'is-valid': userForm.get('startDate')?.valid && (userForm.get('startDate')?.dirty || userForm.get('startDate')?.touched)
+                    }"
+                    formControlName="startDate"
+                    [min]="minDate"
+                    required
+                  />
+                  <div class="invalid-feedback">
+                    <div *ngIf="userForm.get('startDate')?.errors?.['required']">Start date is required.</div>
+                    <div *ngIf="userForm.get('startDate')?.errors?.['pastDate']">Start date cannot be in the past.</div>
+                  </div>
 
-              <!-- Step 3: Select Hotel -->
+                  <label for="endDate" class="form-label mt-3">End Date</label>
+                  <input
+                    type="date"
+                    id="endDate"
+                    class="form-control form-control-sm"
+                    [ngClass]="{'is-invalid': userForm.get('endDate')?.invalid && (userForm.get('endDate')?.dirty || userForm.get('endDate')?.touched),
+                    'is-valid': userForm.get('endDate')?.valid && (userForm.get('endDate')?.dirty || userForm.get('endDate')?.touched)
+                    }"
+                    formControlName="endDate"
+                    [min]="minEndDate"
+                    [max]="maxEndDate"
+                    [attr.disabled]="!userForm.get('startDate')?.value ? '' : null"
+                    required
+                  />
+                  <div class="invalid-feedback">
+                    <div *ngIf="userForm.get('endDate')?.errors?.['required']">End date is required.</div>
+                    <div *ngIf="userForm.get('endDate')?.errors?.['pastDate']">End date must be after the start date.</div>
+                    <div *ngIf="userForm.get('endDate')?.errors?.['futureDate']">End date cannot be more than 30 days after the start date.</div>
+                  </div>
+                  <div *ngIf="userForm.errors?.['dateRangeInvalid']" class="text-danger small mt-1">
+                    End date must be after start date.
+                  </div>
+                  <button
+                    class="btn btn-sm btn-primary mt-2"
+                    [disabled]="userForm.get('startDate')?.invalid || userForm.get('endDate')?.invalid || userForm.errors?.['dateRangeInvalid']"
+                    (click)="nextStep()"
+                  >
+                    Next
+                  </button>
+                </div>
+
+                <!-- Step 3: Select Hotel -->
               <div *ngIf="currentStep === 3" class="mb-3">
                 <ul class="list-group">
                   <li
@@ -123,34 +160,59 @@
                 </ul>
               </div>
 
-              <!-- Step 5: Enter Personal Details -->
-              <div *ngIf="currentStep === 5" class="mb-3">
-                <label for="firstName" class="form-label">First Name</label>
-                <input
-                  type="text"
-                  id="firstName"
-                  class="form-control form-control-sm"
-                  [(ngModel)]="firstname"
-                />
+                <!-- Step 5: Enter Personal Details -->
+                <div *ngIf="currentStep === 5" class="mb-3">
+                  <label for="firstName" class="form-label">First Name</label>
+                  <input
+                    type="text"
+                    id="firstName"
+                    class="form-control form-control-sm"
+                    [ngClass]="{'is-invalid': userForm.get('firstname')?.invalid && (userForm.get('firstname')?.dirty || userForm.get('firstname')?.touched),
+                      'is-valid': userForm.get('firstname')?.valid && (userForm.get('firstname')?.dirty || userForm.get('firstname')?.touched)
+                    }"
+                    formControlName="firstname"
+                    required
+                  />
+                  <div class="invalid-feedback">
+                    <div *ngIf="userForm.get('firstname')?.errors?.['required']">First name is required.</div>
+                    <div *ngIf="userForm.get('firstname')?.errors?.['minlength']">First name must be at least 4 characters long.</div>
+                  </div>
 
-                <label for="lastName" class="form-label mt-3">Last Name</label>
-                <input
-                  type="text"
-                  id="lastName"
-                  class="form-control form-control-sm"
-                  [(ngModel)]="lastname"
-                />
+                  <label for="lastName" class="form-label mt-3">Last Name</label>
+                  <input
+                    type="text"
+                    id="lastName"
+                    class="form-control form-control-sm"
+                    [ngClass]="{'is-invalid': userForm.get('lastname')?.invalid && (userForm.get('lastname')?.dirty || userForm.get('lastname')?.touched),
+                      'is-valid': userForm.get('lastname')?.valid && (userForm.get('lastname')?.dirty || userForm.get('lastname')?.touched)
+                    }"
+                    formControlName="lastname"
+                    required
+                  />
+                  <div class="invalid-feedback">
+                    <div *ngIf="userForm.get('lastname')?.errors?.['required']">Last name is required.</div>
+                    <div *ngIf="userForm.get('lastname')?.errors?.['minlength']">Last name must be at least 4 characters long.</div>
+                  </div>
 
-                <label for="email" class="form-label mt-3">Email</label>
-                <input
-                  type="email"
-                  id="email"
-                  class="form-control form-control-sm"
-                  [(ngModel)]="email"
-                />
+                  <label for="email" class="form-label mt-3">Email</label>
+                  <input
+                    type="email"
+                    id="email"
+                    class="form-control form-control-sm"
+                    [ngClass]="{'is-invalid': userForm.get('email')?.invalid && (userForm.get('email')?.dirty || userForm.get('email')?.touched),
+                      'is-valid': userForm.get('email')?.valid && (userForm.get('email')?.dirty || userForm.get('email')?.touched)
+                    }"
+                    formControlName="email"
+                    required
+                  />
+                  <div class="invalid-feedback">
+                    <div *ngIf="userForm.get('email')?.errors?.['required']">Email is required.</div>
+                    <div *ngIf="userForm.get('email')?.errors?.['email']">Please enter a valid email address.</div>
+                  </div>
 
-                <button class="btn btn-sm btn-primary mt-2" (click)="nextStep()">Next</button>
-              </div>
+                  <button class="btn btn-sm btn-primary mt-2" (click)="nextStep()">Next</button>
+                </div>
+              </form>
 
               <!-- Step 6: Review and Confirm Booking -->
               <div *ngIf="currentStep === 6" class="mt-3">

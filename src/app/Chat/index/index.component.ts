@@ -1,16 +1,19 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { last } from 'rxjs';
 
 @Component({
   selector: 'app-index',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './index.component.html',
   styleUrls: ['./index.component.css'],
 })
 export class IndexComponent implements OnInit {
+  userForm!: FormGroup;
+
   bookingStatus: string = '';
   selectedHotelName: string = '';
   selectedRoomType: string = '';
@@ -34,7 +37,9 @@ export class IndexComponent implements OnInit {
   email: string = '';
   regionId: number = 0;
   filteredRegions: any[] = [];
-
+  minDate: string = '';
+  minEndDate: string = '';
+  maxEndDate: string = '';
 
 
   messages: {
@@ -42,16 +47,105 @@ export class IndexComponent implements OnInit {
     text: string;
   }[] = [];
 
-  constructor(private http: HttpClient) {
 
-
-  }
+  constructor(private http: HttpClient, private user_form: FormBuilder) {}
 
   ngOnInit() {
+    this.currentStep;
+    this.setMinDate();
+    this.createForm();
+    this.listenToStartDateChanges();
+  }
 
-    this.messages.push({
-      text: 'Welcome! Please choose an option to proceed.',
-      sender: 'bot',
+  /*
+    * Date validator methods that validate dates
+    * and check if they are valid and are of current
+    *
+  */
+
+  createForm() {
+    this.userForm = this.user_form.group({
+     	region: ['', [Validators.required, Validators.minLength(4)]],
+      firstname: ['', [Validators.required, Validators.minLength(4)]],
+      lastname: ['', [Validators.required, Validators.minLength(4)]],
+      email: ['', [Validators.required, Validators.email]],
+      startDate: ['', [Validators.required, this.dateValidator('start')]],
+      endDate: ['', [Validators.required, this.dateValidator('end')]]
+    }, { validators: this.dateRangeValidator });
+  }
+
+  // Date validator method
+  dateValidator(type: 'start' | 'end') {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+      if (!control.value) {
+        return null;  // Don't validate empty values to allow optional controls
+      }
+      const inputDate = new Date(control.value);
+      if (type === 'start') {
+        const minDate = new Date(this.minDate);
+        if (inputDate < minDate) {
+          return { pastDate: true };
+        }
+      } else if (type === 'end') {
+        const minEndDate = new Date(this.minEndDate);
+        const maxEndDate = new Date(this.maxEndDate);
+        if (inputDate < minEndDate) {
+          return { pastDate: true };
+        }
+        if (inputDate > maxEndDate) {
+          return { futureDate: true };
+        }
+      }
+      return null;
+    };
+  }
+
+  // Date range validator method
+  dateRangeValidator(formGroup: FormGroup): { [key: string]: any } | null {
+    const startDate = formGroup.get('startDate')?.value;
+    const endDate = formGroup.get('endDate')?.value;
+    if (startDate && endDate && new Date(startDate) >= new Date(endDate)) {
+      return { dateRangeInvalid: true };
+    }
+    return null;
+  }
+
+  // Method for setting date limit
+  setMinDate() {
+    const today = new Date();
+    this.minDate = today.toISOString().split('T')[0];
+  }
+
+  // Method to update the minEndDate based on selected startDate
+  updateMinEndDate(startDate: string) {
+    if (startDate) {
+      const start = new Date(startDate);
+
+      // Set minEndDate to one day after start date
+      this.minEndDate = new Date(start.getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+      // Set maxEndDate to 30 days after start date (adjust as needed)
+      this.maxEndDate = new Date(start.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+      // Reset endDate if it's outside the new valid range
+      const currentEndDate = this.userForm.get('endDate')?.value;
+      if (currentEndDate) {
+        const endDate = new Date(currentEndDate);
+        if (endDate <= start || endDate > new Date(this.maxEndDate)) {
+          this.userForm.get('endDate')?.setValue('');
+        }
+      }
+
+      this.userForm.get('endDate')?.updateValueAndValidity();
+    }
+  }
+
+  //method to check what start date is being selected before freezing it in the end date form fields
+  listenToStartDateChanges() {
+    this.userForm.get('startDate')?.valueChanges.subscribe(startDate => {
+      if (startDate) {
+        this.updateMinEndDate(startDate);
+      }
     });
 
 
@@ -108,12 +202,23 @@ chooseOption(option: string) {
 
     switch (this.currentStep) {
       case 1:
+        
       // fetch all region Name information hereee
-
-        if (this.region){
+        if (this.userForm.get('region')?.valid) {
+          // Proceed to next step
+          this.region = this.userForm.get('region')?.value;
+          console.log('Region is valid:', this.userForm.get('region')?.value);
+          this.currentStep = 2; // Move to Step 2
           this.messages.push({
-            text: 'Please select the start and end date.',
-            sender: 'bot',
+            text: 'Please enter the start and end date.',
+            sender: 'bot'
+          });
+        } else {
+          // Show error message
+          console.log('Please enter a valid region');
+          this.messages.push({
+            text: 'Please enter a valid region before proceeding.',
+            sender: 'bot'
           });
           this.filteredRegions = []; // Clear the suggestions after moving to the next step
           this.currentStep = 2;
@@ -122,18 +227,36 @@ chooseOption(option: string) {
             text: 'Please You Must Enter Region...!',
             sender: 'bot',
           });
-
         }
     break;
 
       case 2:
-        if (this.startDate && this.endDate) {
-          this.calculateDays();
-          this.fetchHotels();
+        // Retrieve date values from form controls
+        const startDate = this.userForm.get('startDate')?.value;
+        const endDate = this.userForm.get('endDate')?.value;
+
+        if (startDate && endDate) {
+          this.startDate = startDate; // Set class properties
+          this.endDate = endDate;
+
+          if (this.userForm.get('startDate')?.valid && this.userForm.get('endDate')?.valid) {
+            console.log(this.startDate);
+            console.log(this.endDate);
+            this.calculateDays();
+            this.fetchHotels();
+            this.currentStep = 3; // Move to Step 3
+          } else {
+            console.log('Please enter valid dates');
+            this.messages.push({
+              text: 'Please enter valid start and end dates before proceeding.',
+              sender: 'bot'
+            });
+          }
         } else {
+          console.log('Start date and end date are required');
           this.messages.push({
-            text: 'Please enter both start and end dates.',
-            sender: 'bot',
+            text: 'Start date and end date are required.',
+            sender: 'bot'
           });
         }
         break;
@@ -158,34 +281,17 @@ chooseOption(option: string) {
         }
         break;
       case 5:
-             // vcalidate user data
-        if(this.firstname === '')
-        {
-          this.messages.push({
-            text: 'Please Your FirstName...!',
-            sender: 'bot',
-          });
-        }
-         if(this.lastname ==='') {
-          this.messages.push({
-            text: 'Please Your LastName...!',
-            sender: 'bot',
-          });
-         }
-        if( this.email === ''){
-          this.messages.push({
-            text: 'Please Your Email...!',
-            sender: 'bot',
-          });
-        }
-
+        this.firstname = this.userForm.get('firstname')?.value;
+        this.lastname = this.userForm.get('lastname')?.value;
+        this.email = this.userForm.get('email')?.value;
         if (this.firstname && this.lastname && this.email) {
-          this.generateBookingNumber();
+          // this.generateBookingNumber();
           this.messages.push({
             text: 'Please review your booking details.',
             sender: 'bot',
           });
           this.currentStep = 6; // Move to the review step
+          this.generateBookingNumber();
         } else {
           this.messages.push({
             text: 'Please fill in all your personal details before proceeding.',
@@ -212,7 +318,7 @@ chooseOption(option: string) {
     const startDate = encodeURIComponent(this.startDate);
     const endDate = encodeURIComponent(this.endDate);
     const regionName = encodeURIComponent(this.region); // Ensure regionName is set
-
+    console.log(this.region);
     // Fetch the region ID based on the region name
     this.http
       .get(`http://localhost:3000/region/id?name=${regionName}`)
@@ -387,10 +493,6 @@ chooseOption(option: string) {
                 (response: any) => {
                   if (response.status) {
                     this.bookingStatus = 'success';
-                    this.messages.push({
-                      text: `Booking confirmed at ${this.selectedHotelName}. Your booking number is ${this.bookingNumber}.`,
-                      sender: 'bot',
-                    });
                   } else {
                     this.bookingStatus = 'failed';
                     this.messages.push({

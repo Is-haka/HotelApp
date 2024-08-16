@@ -202,7 +202,7 @@ chooseOption(option: string) {
 
     switch (this.currentStep) {
       case 1:
-        
+        if(this.userForm.get('region')?.valid)
       // fetch all region Name information hereee
         if (this.userForm.get('region')?.valid) {
           // Proceed to next step

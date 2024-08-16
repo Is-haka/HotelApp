@@ -41,20 +41,33 @@
                 </div>
               </div>
             </div>
-
             <!-- Booking process -->
             <div *ngIf="userChoice === 'Booking'" class="mt-4">
+              <!-- ************************************************************** -->
               <!-- Step 1: Enter Region -->
               <div *ngIf="currentStep === 1" class="mb-3">
+                <!-- Input field for live region search -->
                 <input
                   type="text"
                   class="form-control form-control-sm"
                   placeholder="Enter Region"
                   [(ngModel)]="region"
+                  (input)="searchRegion($event)"
                   (keyup.enter)="nextStep()"
                 />
+
+                <!-- Dropdown for displaying filtered region suggestions -->
+                <ul *ngIf="filteredRegions.length > 0" class="list-group mt-2">
+                  <li *ngFor="let region of filteredRegions"
+                      class="list-group-item list-group-item-action"
+                      (click)="selectRegion(region)">
+                      {{ region.name }}
+                  </li>
+                </ul>
+                <!-- Next button to proceed to the next step -->
                 <button class="btn btn-sm btn-primary mt-2" (click)="nextStep()">Next</button>
               </div>
+              <!-- ***************************************************** -->
 
               <!-- Step 2: Enter Dates -->
               <div *ngIf="currentStep === 2" class="mb-3">

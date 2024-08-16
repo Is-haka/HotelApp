@@ -118,15 +118,16 @@ server.post("/region/create", (req,res)=>{
                   return res.status(400).send({ status: false, message: 'Region name is required' });
                 }
 
-                // Query to fetch hotels based on exact region name by joining two tables: region and hotel
+                // Query to fetch hotels based on partial region name, case-insensitive
                 const query = `
                   SELECT h.id, h.name, h.address, h.contact_info, r.name AS regionName
                   FROM hotel h
                   JOIN region r ON h.region_id = r.id
-                  WHERE r.name = ?
+                  WHERE LOWER(r.name) LIKE LOWER(?)
                 `;
 
-                connection.query(query, [regionName], (error, results) => {
+                // Using `%${regionName}%` to match any part of the region name
+                connection.query(query, [`%${regionName}%`], (error, results) => {
                   if (error) {
                     console.error('Database query error:', error);
                     return res.status(500).send({ status: false, message: 'An error occurred while searching for hotels' });
@@ -141,9 +142,7 @@ server.post("/region/create", (req,res)=>{
               });
 
 
-//************************************************************************************************* */
-
-
+//*************************************************** */
 //post api for create location
 server.post("/location/create", (req,res)=>{
   let details = {

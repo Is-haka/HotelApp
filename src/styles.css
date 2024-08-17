@@ -1,3 +1,27 @@
+:root {
+  /* Font families */
+  --font-montserrat: "Montserrat", sans-serif;
+  --font-roboto: "Roboto", sans-serif;
+
+  /* Font weights */
+  --font-weight-thin: 100;
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+  --font-weight-black: 900;
+
+  /* Font styles */
+  --font-style-normal: normal;
+  --font-style-italic: italic;
+}
+
+html, body {
+  font-family: var(--font-montserrat);
+  font-weight: var(--font-weight-light);
+  font-style: var(--font-style-normal);
+}
+
 .chat-container {
   padding: 10px;
   max-width: 600px;
@@ -41,7 +65,7 @@
 }
 
 .hover-shadow:hover {
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 3px 1px rgba(161, 161, 161, 0.308);
   transition: box-shadow 0.3s ease-in-out;
 }
 
@@ -111,6 +135,4 @@
 .user-message::after {
   right: -10px;
 }
-
-html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

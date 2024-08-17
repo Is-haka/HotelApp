@@ -14,6 +14,9 @@
                   [ngClass]="{'bot-message': message.sender === 'bot', 'user-message': message.sender === 'user'}">
                 <span class="text-start">{{ message.text }}</span>
               </div>
+              <div *ngIf="noRegion === 1">
+                <button class="btn btn-sm border-warning rounded mt-2" (click)="returnStep()"><i class="fas fa-step-backward fa-sm text-warning fa-fw"></i></button> &nbsp;
+              </div>
             </div>
 
             <!-- Display options initially -->
@@ -24,7 +27,7 @@
                   (click)="chooseOption('Booking')"
                 >
                   <div class="card-body text-center d-flex flex-column justify-content-center">
-                    <h5 class="card-title">Booking</h5>
+                    <h5 class="card-title">Booking <i class="fas fa-link fa-xm fa-fw text-primary"></i> </h5>
                     <p class="card-text">Start booking a room</p>
                   </div>
                 </div>
@@ -35,7 +38,7 @@
                   (click)="chooseOption('Complaints/Inquiry')"
                 >
                   <div class="card-body text-center d-flex flex-column justify-content-center">
-                    <h5 class="card-title">Complaints/Inquiry</h5>
+                    <h5 class="card-title">Complaints/Inquiry <i class="fas fa-link fa-xm fa-fw text-primary"></i> </h5>
                     <p class="card-text">Submit a complaint or inquiry</p>
                   </div>
                 </div>
@@ -63,7 +66,7 @@
                     <div *ngIf="userForm.get('region')?.errors?.['required']">Region is required.</div>
                     <div *ngIf="userForm.get('region')?.errors?.['minlength']">Region must be at least 4 characters long.</div>
                   </div>
-                  
+
                 <!-- Dropdown for displaying filtered region suggestions -->
                 <ul *ngIf="filteredRegions.length > 0" class="list-group mt-2">
                   <li *ngFor="let region of filteredRegions"
@@ -72,7 +75,8 @@
                       {{ region.name }}
                   </li>
                 </ul>
-                  <button class="btn btn-sm btn-primary mt-2" [disabled]="userForm.get('region')?.invalid" (click)="nextStep()">Next</button>
+                <button class="btn btn-sm border-warning rounded mt-2" (click)="returnStep()"><i class="fas fa-step-backward fa-sm text-warning fa-fw"></i></button> &nbsp;
+                <button class="btn btn-sm btn-primary mt-2" [disabled]="userForm.get('region')?.invalid" (click)="nextStep()">Next</button>
                 </div>
 
                 <!-- Step 2: Enter Dates -->
@@ -116,6 +120,7 @@
                   <div *ngIf="userForm.errors?.['dateRangeInvalid']" class="text-danger small mt-1">
                     End date must be after start date.
                   </div>
+                  <button class="btn btn-sm border-warning rounded mt-2" (click)="returnStep()"><i class="fas fa-step-backward fa-sm text-warning fa-fw"></i></button> &nbsp;
                   <button
                     class="btn btn-sm btn-primary mt-2"
                     [disabled]="userForm.get('startDate')?.invalid || userForm.get('endDate')?.invalid || userForm.errors?.['dateRangeInvalid']"
@@ -143,13 +148,13 @@
 
               <!-- Step 4: Select Room Type -->
               <div *ngIf="currentStep === 4" class="mb-3">
+                <button class="btn btn-sm border-warning rounded m-2" (click)="returnStep()"><i class="fas fa-step-backward fa-sm text-warning fa-fw"></i></button> &nbsp;
                 <ul class="list-group">
                   <li
                     class="list-group-item d-flex justify-content-between align-items-center cursor-pointer"
                     *ngFor="let room of rooms"
                   >
                     <span>{{ room.type }} room - ${{ room.price }}</span>
-                    <p>{{ room.id }}</p> <!-- Debugging output to see room ID -->
                     <button
                       class="btn btn-primary"
                       (click)="selectRoom(room.id)"
@@ -209,7 +214,7 @@
                     <div *ngIf="userForm.get('email')?.errors?.['required']">Email is required.</div>
                     <div *ngIf="userForm.get('email')?.errors?.['email']">Please enter a valid email address.</div>
                   </div>
-
+                  <button class="btn btn-sm border-warning rounded mt-2" (click)="returnStep()"><i class="fas fa-step-backward fa-sm text-warning fa-fw"></i></button> &nbsp;
                   <button class="btn btn-sm btn-primary mt-2" (click)="nextStep()">Next</button>
                 </div>
               </form>
@@ -251,15 +256,110 @@
 
             <!-- Complaints/Inquiry process -->
             <div *ngIf="userChoice === 'Complaints/Inquiry'" class="mt-4">
-              <div *ngIf="currentStep === 1" class="mb-3">
-                <textarea
-                  class="form-control form-control-sm"
-                  rows="3"
-                  placeholder="Enter your complaint or inquiry"
-                  [(ngModel)]="complaint"
-                ></textarea>
-                <button class="btn btn-sm btn-primary mt-2" (click)="submitComplaint()">Submit</button>
+              <div *ngIf="currentStep === 1" class="mb-3 text-start">
+                <span class="badge badge-sm bg-light text-dark">Click 'Yes' for inquiry or 'No' for complaints about a booking</span>
+                <div class="d-flex position-relative justify-content-start">
+                  <button (click)="handleYesNo('Yes')" class="btn btn-sm btn-primary m-2">Yes</button>
+                  <button (click)="handleYesNo('No')" class="btn btn-sm btn-outline-secondary rounded-circle m-2">No</button>
+                </div>
               </div>
+              <form [formGroup]="userForm">
+                <div *ngIf="currentStep === 2 && isInquiry" class="mb-3">
+                  <div class="form-group form-floating m-2">
+                    <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    placeholder="Your fullname"
+                    formControlName="fullname"
+                    [ngClass]="{'is-invalid': userForm.get('fullname')?.invalid && (userForm.get('fullname')?.dirty || userForm.get('fullname')?.touched),
+                      'is-valid': userForm.get('fullname')?.valid && (userForm.get('fullname')?.dirty || userForm.get('fullname')?.touched)
+                    }"
+                    >
+                    <div class="invalid-feedback">
+                      <small *ngIf="userForm.get('fullname')?.errors?.['minlength']">Last name must be at least 4 characters long.</small>
+                    </div>
+                    <label for="Your fullname">Your fullname</label>
+                  </div>
+                  <div class="form-group form-floating m-2">
+                    <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    placeholder="Your phone number"
+                    formControlName="phone"
+                    [ngClass]="{'is-invalid': userForm.get('phone')?.invalid && (userForm.get('phone')?.dirty || userForm.get('phone')?.touched),
+                      'is-valid': userForm.get('phone')?.valid && (userForm.get('phone')?.dirty || userForm.get('phone')?.touched)
+                    }"
+                    >
+                    <div class="invalid-feedback">
+                      <small *ngIf="userForm.get('phone')?.errors?.['required']">phone number is required.</small>
+                      <small *ngIf="userForm.get('phone')?.errors?.['minlength']">Enter a 10 digit of your phone valid number.</small>
+                    </div>
+                    <label for="Your phone number">Your phone number</label>
+                  </div>
+                  <div class="form-group form-floating m-2">
+                    <textarea
+                    class="form-control form-control-sm"
+                    formControlName="inquiryText"
+                    placeholder="Enter your inquiry"
+                    [ngClass]="{'is-invalid': userForm.get('inquiryText')?.invalid && (userForm.get('inquiryText')?.dirty || userForm.get('inquiryText')?.touched),
+                      'is-valid': userForm.get('inquiryText')?.valid && (userForm.get('inquiryText')?.dirty || userForm.get('inquiryText')?.touched)
+                    }"
+                    (keyup.enter)="nextStep()"
+                    >
+                  </textarea>
+                  <div class="invalid-feedback">
+                    <small *ngIf="userForm.get('inquiryText')?.errors?.['required']">Please enter your inquiry.</small>
+                    <small *ngIf="userForm.get('inquiryText')?.errors?.['minlength']">Inquiry needs at least 10 characters long of message.</small>
+                  </div>
+                  <label for="inquiryTextarea">Enter your inquiry</label>
+                  </div>
+                <button
+                  class="btn btn-sm btn-primary m-2"
+                  [disabled]="userForm.get('fullname')?.invalid || userForm.get('phone')?.invalid || userForm.get('inquiryText')?.invalid"
+                  (click)="nextStep()"
+                  >
+                  next
+              </button>
+                </div>
+                <div *ngIf="currentStep === 3 && isInquiry" class="mb-3 form-floating">
+                  <input
+                  type="text"
+                  class="form-control"
+                  id="bookingNumberInput"
+                  placeholder=""
+                  formControlName="bookingNumber"
+                  [ngClass]="{'is-invalid': userForm.get('bookingNumber')?.invalid && (userForm.get('bookingNumber')?.dirty || userForm.get('bookingNumber')?.touched),
+                      'is-valid': userForm.get('bookingNumber')?.valid && (userForm.get('bookingNumber')?.dirty || userForm.get('bookingNumber')?.touched)
+                    }"
+                  (keyup.enter)="nextStep()"
+                  >
+                  <div class="invalid-feedback">
+                    <small *ngIf="userForm.get('bookingNumber')?.errors?.['required']">Book number is required.</small>
+                  </div>
+                  <label for="bookingNumberInput">Enter your booking number</label>
+                </div>
+
+                <div *ngIf="currentStep === 4" class="mb-3 text-start">
+                  <span class="badge badge-sm bg-light text-dark">Click 'Yes' if you have more details or 'No' to submit your complaint</span>
+                  <div class="d-flex position-relative justify-content-start">
+                    <button (click)="yesNo('Yes')" class="btn btn-sm btn-primary m-2">Yes</button>
+                    <button (click)="yesNo('No')" class="btn btn-sm btn-outline-secondary rounded-circle m-2">No</button>
+                  </div>
+                </div>
+                <div *ngIf="currentStep === 5" class="mb-3 form-floating">
+                  <textarea
+                  class="form-control"
+                  id="additionalDetailsTextarea"
+                  placeholder=""
+                  formControlName="additionalDetails"
+                  (keyup.enter)="nextStep()">
+                </textarea>
+                  <label for="additionalDetailsTextarea">Enter additional details</label>
+                </div>
+                <div *ngIf="currentStep === 5" class="d-grid">
+                  <button class="btn btn-primary" (click)="nextStep()">Submit</button>
+                </div>
+              </form>
             </div>
           </div>
         </div>

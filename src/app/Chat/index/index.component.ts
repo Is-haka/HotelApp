@@ -174,7 +174,6 @@ searchRegion(event: Event) {
     this.http.get<any[]>(`http://localhost:3000/region?name=${query}`)
       .subscribe((response: any) => {
         this.filteredRegions = response.data;
-        console.log(response.data);
 
       });
   } else {

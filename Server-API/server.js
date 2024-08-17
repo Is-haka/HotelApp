@@ -108,35 +108,32 @@ server.post("/region/create", (req,res)=>{
 
 
 //************************************************************************************************* */
-                // Server Modification search region by name
-               // modificatio search through region name
 
-               server.get('/region', (req, res) => {
+              server.get('/region', (req, res) => {
                 const regionName = req.query.name;
 
                 if (!regionName) {
                   return res.status(400).send({ status: false, message: 'Region name is required' });
                 }
 
-                // Query to fetch hotels based on partial region name, case-insensitive
+                // Query to fetch regions based on partial region name, case-insensitive
                 const query = `
-                  SELECT h.id, h.name, h.address, h.contact_info, r.name AS regionName
-                  FROM hotel h
-                  JOIN region r ON h.region_id = r.id
-                  WHERE LOWER(r.name) LIKE LOWER(?)
+                  SELECT id, name
+                  FROM region
+                  WHERE LOWER(name) LIKE LOWER(?)
                 `;
 
                 // Using `%${regionName}%` to match any part of the region name
                 connection.query(query, [`%${regionName}%`], (error, results) => {
                   if (error) {
                     console.error('Database query error:', error);
-                    return res.status(500).send({ status: false, message: 'An error occurred while searching for hotels' });
+                    return res.status(500).send({ status: false, message: 'An error occurred while searching for regions' });
                   }
 
                   if (results.length > 0) {
                     res.send({ status: true, data: results });
                   } else {
-                    res.send({ status: false, message: 'No hotels found for the specified region' });
+                    res.send({ status: false, message: 'No regions found for the specified name' });
                   }
                 });
               });

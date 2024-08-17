@@ -160,6 +160,7 @@ searchRegion(event: Event) {
       .subscribe((response: any) => {
         this.filteredRegions = response.data;
         console.log(response.data);
+
       });
   } else {
     this.filteredRegions = [];
@@ -168,15 +169,11 @@ searchRegion(event: Event) {
 
 // Handle the selection of a region
 selectRegion(region: any) {
-  this.region = region.name;
+  // this.region = region.name;
+          // Update the form control with the selected region name
+  this.userForm.get('region')?.setValue(region.name);
   this.filteredRegions = []; // Clear the suggestions after selection
 }
-
-
-
-
-
-
 // *****************************************************************
 chooseOption(option: string) {
     this.userChoice = option;

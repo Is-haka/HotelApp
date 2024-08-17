@@ -256,15 +256,110 @@
 
             <!-- Complaints/Inquiry process -->
             <div *ngIf="userChoice === 'Complaints/Inquiry'" class="mt-4">
-              <div *ngIf="currentStep === 1" class="mb-3">
-                <textarea
-                  class="form-control form-control-sm"
-                  rows="3"
-                  placeholder="Enter your complaint or inquiry"
-                  [(ngModel)]="complaint"
-                ></textarea>
-                <button class="btn btn-sm btn-primary mt-2" (click)="submitComplaint()">Submit</button>
+              <div *ngIf="currentStep === 1" class="mb-3 text-start">
+                <span class="badge badge-sm bg-light text-dark">Click 'Yes' for inquiry or 'No' for complaints about a booking</span>
+                <div class="d-flex position-relative justify-content-start">
+                  <button (click)="handleYesNo('Yes')" class="btn btn-sm btn-primary m-2">Yes</button>
+                  <button (click)="handleYesNo('No')" class="btn btn-sm btn-outline-secondary rounded-circle m-2">No</button>
+                </div>
               </div>
+              <form [formGroup]="userForm">
+                <div *ngIf="currentStep === 2 && isInquiry" class="mb-3">
+                  <div class="form-group form-floating m-2">
+                    <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    placeholder="Your fullname"
+                    formControlName="fullname"
+                    [ngClass]="{'is-invalid': userForm.get('fullname')?.invalid && (userForm.get('fullname')?.dirty || userForm.get('fullname')?.touched),
+                      'is-valid': userForm.get('fullname')?.valid && (userForm.get('fullname')?.dirty || userForm.get('fullname')?.touched)
+                    }"
+                    >
+                    <div class="invalid-feedback">
+                      <small *ngIf="userForm.get('fullname')?.errors?.['minlength']">Last name must be at least 4 characters long.</small>
+                    </div>
+                    <label for="Your fullname">Your fullname</label>
+                  </div>
+                  <div class="form-group form-floating m-2">
+                    <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    placeholder="Your phone number"
+                    formControlName="phone"
+                    [ngClass]="{'is-invalid': userForm.get('phone')?.invalid && (userForm.get('phone')?.dirty || userForm.get('phone')?.touched),
+                      'is-valid': userForm.get('phone')?.valid && (userForm.get('phone')?.dirty || userForm.get('phone')?.touched)
+                    }"
+                    >
+                    <div class="invalid-feedback">
+                      <small *ngIf="userForm.get('phone')?.errors?.['required']">phone number is required.</small>
+                      <small *ngIf="userForm.get('phone')?.errors?.['minlength']">Enter a 10 digit of your phone valid number.</small>
+                    </div>
+                    <label for="Your phone number">Your phone number</label>
+                  </div>
+                  <div class="form-group form-floating m-2">
+                    <textarea
+                    class="form-control form-control-sm"
+                    formControlName="inquiryText"
+                    placeholder="Enter your inquiry"
+                    [ngClass]="{'is-invalid': userForm.get('inquiryText')?.invalid && (userForm.get('inquiryText')?.dirty || userForm.get('inquiryText')?.touched),
+                      'is-valid': userForm.get('inquiryText')?.valid && (userForm.get('inquiryText')?.dirty || userForm.get('inquiryText')?.touched)
+                    }"
+                    (keyup.enter)="nextStep()"
+                    >
+                  </textarea>
+                  <div class="invalid-feedback">
+                    <small *ngIf="userForm.get('inquiryText')?.errors?.['required']">Please enter your inquiry.</small>
+                    <small *ngIf="userForm.get('inquiryText')?.errors?.['minlength']">Inquiry needs at least 10 characters long of message.</small>
+                  </div>
+                  <label for="inquiryTextarea">Enter your inquiry</label>
+                  </div>
+                <button
+                  class="btn btn-sm btn-primary m-2"
+                  [disabled]="userForm.get('fullname')?.invalid || userForm.get('phone')?.invalid || userForm.get('inquiryText')?.invalid"
+                  (click)="nextStep()"
+                  >
+                  next
+              </button>
+                </div>
+                <div *ngIf="currentStep === 3 && isInquiry" class="mb-3 form-floating">
+                  <input
+                  type="text"
+                  class="form-control"
+                  id="bookingNumberInput"
+                  placeholder=""
+                  formControlName="bookingNumber"
+                  [ngClass]="{'is-invalid': userForm.get('bookingNumber')?.invalid && (userForm.get('bookingNumber')?.dirty || userForm.get('bookingNumber')?.touched),
+                      'is-valid': userForm.get('bookingNumber')?.valid && (userForm.get('bookingNumber')?.dirty || userForm.get('bookingNumber')?.touched)
+                    }"
+                  (keyup.enter)="nextStep()"
+                  >
+                  <div class="invalid-feedback">
+                    <small *ngIf="userForm.get('bookingNumber')?.errors?.['required']">Book number is required.</small>
+                  </div>
+                  <label for="bookingNumberInput">Enter your booking number</label>
+                </div>
+
+                <div *ngIf="currentStep === 4" class="mb-3 text-start">
+                  <span class="badge badge-sm bg-light text-dark">Click 'Yes' if you have more details or 'No' to submit your complaint</span>
+                  <div class="d-flex position-relative justify-content-start">
+                    <button (click)="yesNo('Yes')" class="btn btn-sm btn-primary m-2">Yes</button>
+                    <button (click)="yesNo('No')" class="btn btn-sm btn-outline-secondary rounded-circle m-2">No</button>
+                  </div>
+                </div>
+                <div *ngIf="currentStep === 5" class="mb-3 form-floating">
+                  <textarea
+                  class="form-control"
+                  id="additionalDetailsTextarea"
+                  placeholder=""
+                  formControlName="additionalDetails"
+                  (keyup.enter)="nextStep()">
+                </textarea>
+                  <label for="additionalDetailsTextarea">Enter additional details</label>
+                </div>
+                <div *ngIf="currentStep === 5" class="d-grid">
+                  <button class="btn btn-primary" (click)="nextStep()">Submit</button>
+                </div>
+              </form>
             </div>
           </div>
         </div>

@@ -149,7 +149,6 @@
                     *ngFor="let room of rooms"
                   >
                     <span>{{ room.type }} room - ${{ room.price }}</span>
-                    <p>{{ room.id }}</p> <!-- Debugging output to see room ID -->
                     <button
                       class="btn btn-primary"
                       (click)="selectRoom(room.id)"

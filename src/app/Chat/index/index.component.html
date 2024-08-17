@@ -24,7 +24,7 @@
                   (click)="chooseOption('Booking')"
                 >
                   <div class="card-body text-center d-flex flex-column justify-content-center">
-                    <h5 class="card-title">Booking</h5>
+                    <h5 class="card-title">Booking <i class="fas fa-link fa-xm fa-fw text-primary"></i> </h5>
                     <p class="card-text">Start booking a room</p>
                   </div>
                 </div>
@@ -35,7 +35,7 @@
                   (click)="chooseOption('Complaints/Inquiry')"
                 >
                   <div class="card-body text-center d-flex flex-column justify-content-center">
-                    <h5 class="card-title">Complaints/Inquiry</h5>
+                    <h5 class="card-title">Complaints/Inquiry <i class="fas fa-link fa-xm fa-fw text-primary"></i> </h5>
                     <p class="card-text">Submit a complaint or inquiry</p>
                   </div>
                 </div>
@@ -63,7 +63,7 @@
                     <div *ngIf="userForm.get('region')?.errors?.['required']">Region is required.</div>
                     <div *ngIf="userForm.get('region')?.errors?.['minlength']">Region must be at least 4 characters long.</div>
                   </div>
-                  
+
                 <!-- Dropdown for displaying filtered region suggestions -->
                 <ul *ngIf="filteredRegions.length > 0" class="list-group mt-2">
                   <li *ngFor="let region of filteredRegions"

@@ -12,7 +12,16 @@ import { last } from 'rxjs';
   styleUrls: ['./index.component.css'],
 })
 export class IndexComponent implements OnInit {
-  userForm!: FormGroup;
+
+userForm!: FormGroup;
+
+  additionalDetails: string = '';
+  isInquiry: any;
+  inquiryText: string = '';
+  choice: string = '';
+  fullname: string = '';
+  phone: string = '';
+
 
   bookingStatus: string = '';
   selectedHotelName: string = '';
@@ -71,7 +80,12 @@ export class IndexComponent implements OnInit {
       lastname: ['', [Validators.required, Validators.minLength(4)]],
       email: ['', [Validators.required, Validators.email]],
       startDate: ['', [Validators.required, this.dateValidator('start')]],
-      endDate: ['', [Validators.required, this.dateValidator('end')]]
+      endDate: ['', [Validators.required, this.dateValidator('end')]],
+      inquiryText: ['', [Validators.required, Validators.minLength(8)]],
+      additionalDetails: ['', [Validators.required, Validators.minLength(8)]],
+      fullname: ['', [Validators.minLength(4)]],
+      phone: ['', [Validators.required, Validators.minLength(12)]],
+      bookingNumber: ['', [Validators.required]]
     }, { validators: this.dateRangeValidator });
   }
 
@@ -179,6 +193,39 @@ returnStep() {
   this.noRegion = 0;
 }
 
+handleYesNo(choice: string) {
+  if (this.currentStep === 1) {
+    this.isInquiry = choice === 'Yes';
+    this.messages.push({
+      text: this.isInquiry ? 'Please enter your inquiry.' : 'Please enter your booking number.',
+      sender: 'bot'
+    });
+    this.currentStep = 2;
+  }
+}
+
+yesNo(choice: string) {
+  if (this.currentStep === 4) {
+    if (this.isInquiry) {
+      this.choice = choice;
+      this.messages.push({
+        text: this.choice === 'Yes' ? 'Please provide more details about your inquiry.' : 'Thank you for your prompt response.',
+        sender: 'bot'
+      });
+      if(this.choice === "No") {
+        this.submitComplaint();
+        this.currentStep = 0;
+      }
+    } else {
+      this.messages.push({
+        text: choice === 'Yes' ? 'Please provide more details about your complaint.' : 'Thank you for your prompt response.',
+        sender: 'bot'
+      });
+      this.currentStep = 5; // Move to the next step after selecting additional details
+    }
+  }
+}
+
 // *****************************************************************
 chooseOption(option: string) {
     this.userChoice = option;
@@ -233,7 +280,22 @@ chooseOption(option: string) {
     break;
 
       case 2:
-        // Retrieve date values from form controls
+        //check if it is inquiry values or date values from form control
+        if(this.userForm.get('fullname')?.valid && this.userForm.get('phone')?.valid && this.userForm.get('inquiryText')?.valid) {
+          //submitting inquiry to database
+          if(this.userForm.get('inquiryText')?.valid) {
+            this.fullname = this.userForm.get('fullname')?.value;
+            this.phone = this.userForm.get('phone')?.value;
+            this.inquiryText = this.userForm.get('inquiryText')?.value;
+            this.currentStep = 4;
+          }else {
+            this.messages.push({
+              text: 'please fill out enter your inquiry',
+              sender: 'bot'
+            });
+          }
+        } else if(this.userForm.get('startDate')?.valid && this.userForm.get('endDate')?.valid) {
+          // Retrieve date values from form controls
         const startDate = this.userForm.get('startDate')?.value;
         const endDate = this.userForm.get('endDate')?.value;
 
@@ -259,9 +321,13 @@ chooseOption(option: string) {
             sender: 'bot'
           });
         }
+        }
         break;
       case 3:
-        if (this.selectedHotel) {
+        if(this.userForm.get('bookingNumber')?.valid) {
+          console.log('hello');
+
+        } else if (this.selectedHotel) {
           this.fetchRooms();
         } else {
           this.messages.push({
@@ -299,6 +365,12 @@ chooseOption(option: string) {
           });
         }
         break;
+        case 7:
+          this.messages.push({
+            text: 'Thank you for your inquiry, we will review it and get back to you!',
+            sender: 'bot'
+          });
+          break;
       default:
         this.messages.push({
           text: 'Something went wrong. Please try again.',
@@ -536,11 +608,11 @@ chooseOption(option: string) {
   }
 
   submitComplaint() {
-    if (this.complaint) {
-      this.http
-        .post('http://localhost:3000/complaints', {
-          complaint: this.complaint,
-          email: this.email,
+    if (this.inquiryText) {
+      this.http.post('http://localhost:3000/inquiry', {
+        fullname: this.fullname,
+        phone: this.phone,
+        customDesc: this.inquiryText,
         })
         .subscribe(
           (response: any) => {

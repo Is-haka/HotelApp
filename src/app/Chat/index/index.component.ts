@@ -46,6 +46,7 @@ export class IndexComponent implements OnInit {
     sender: 'bot' | 'user' | undefined;
     text: string;
   }[] = [];
+  noRegion: number = 0;
 
 
   constructor(private http: HttpClient, private user_form: FormBuilder) {}
@@ -172,10 +173,11 @@ selectRegion(region: any) {
   this.filteredRegions = []; // Clear the suggestions after selection
 }
 
-
-
-
-
+//Method to get back one step
+returnStep() {
+  this.currentStep = this.currentStep - 1;
+  this.noRegion = 0;
+}
 
 // *****************************************************************
 chooseOption(option: string) {
@@ -362,6 +364,9 @@ chooseOption(option: string) {
                 }
               );
           } else {
+            this.messages.pop();
+            this.messages.pop();
+            this.noRegion = 1;
             this.messages.push({
               text: 'Failed to fetch region data. Please try again later.',
               sender: 'bot',

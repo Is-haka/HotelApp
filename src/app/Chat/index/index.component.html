@@ -14,6 +14,9 @@
                   [ngClass]="{'bot-message': message.sender === 'bot', 'user-message': message.sender === 'user'}">
                 <span class="text-start">{{ message.text }}</span>
               </div>
+              <div *ngIf="noRegion === 1">
+                <button class="btn btn-sm border-warning rounded mt-2" (click)="returnStep()"><i class="fas fa-step-backward fa-sm text-warning fa-fw"></i></button> &nbsp;
+              </div>
             </div>
 
             <!-- Display options initially -->
@@ -72,7 +75,8 @@
                       {{ region.name }}
                   </li>
                 </ul>
-                  <button class="btn btn-sm btn-primary mt-2" [disabled]="userForm.get('region')?.invalid" (click)="nextStep()">Next</button>
+                <button class="btn btn-sm border-warning rounded mt-2" (click)="returnStep()"><i class="fas fa-step-backward fa-sm text-warning fa-fw"></i></button> &nbsp;
+                <button class="btn btn-sm btn-primary mt-2" [disabled]="userForm.get('region')?.invalid" (click)="nextStep()">Next</button>
                 </div>
 
                 <!-- Step 2: Enter Dates -->
@@ -116,6 +120,7 @@
                   <div *ngIf="userForm.errors?.['dateRangeInvalid']" class="text-danger small mt-1">
                     End date must be after start date.
                   </div>
+                  <button class="btn btn-sm border-warning rounded mt-2" (click)="returnStep()"><i class="fas fa-step-backward fa-sm text-warning fa-fw"></i></button> &nbsp;
                   <button
                     class="btn btn-sm btn-primary mt-2"
                     [disabled]="userForm.get('startDate')?.invalid || userForm.get('endDate')?.invalid || userForm.errors?.['dateRangeInvalid']"
@@ -143,6 +148,7 @@
 
               <!-- Step 4: Select Room Type -->
               <div *ngIf="currentStep === 4" class="mb-3">
+                <button class="btn btn-sm border-warning rounded m-2" (click)="returnStep()"><i class="fas fa-step-backward fa-sm text-warning fa-fw"></i></button> &nbsp;
                 <ul class="list-group">
                   <li
                     class="list-group-item d-flex justify-content-between align-items-center cursor-pointer"
@@ -208,7 +214,7 @@
                     <div *ngIf="userForm.get('email')?.errors?.['required']">Email is required.</div>
                     <div *ngIf="userForm.get('email')?.errors?.['email']">Please enter a valid email address.</div>
                   </div>
-
+                  <button class="btn btn-sm border-warning rounded mt-2" (click)="returnStep()"><i class="fas fa-step-backward fa-sm text-warning fa-fw"></i></button> &nbsp;
                   <button class="btn btn-sm btn-primary mt-2" (click)="nextStep()">Next</button>
                 </div>
               </form>

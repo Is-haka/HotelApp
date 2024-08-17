@@ -240,8 +240,6 @@ chooseOption(option: string) {
           this.endDate = endDate;
 
           if (this.userForm.get('startDate')?.valid && this.userForm.get('endDate')?.valid) {
-            console.log(this.startDate);
-            console.log(this.endDate);
             this.calculateDays();
             this.fetchHotels();
             this.currentStep = 3; // Move to Step 3

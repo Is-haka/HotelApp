@@ -350,6 +350,30 @@ server.get("/booking", (req,res) => {
 //   });
 // });
 
+// Handle and store complaint
+
+//API endpoint for submitting inquiry to the complaints table
+server.post('/inquiry', (req, res) => {
+  const {customDesc} = req.body;
+  const {fullname} = req.body;
+  const {phone} = req.body;
+  console.log(req.body);
+
+  if(customDesc && fullname && phone) {
+    const qry = "INSERT INTO complain(fullname, phone, customDesc) VALUES(?, ?, ?)";
+    connection.query(qry, [fullname, phone, customDesc], (error) => {
+      if(error) {
+        console.log(error);
+        res.send({ status: false, message: 'failed to submit inquiry'});
+      } else {
+        res.send({ status: true, message: 'inquiry submitted successfully' });
+      }
+    });
+  } else {
+    return res.status(400).send({ status: false, message: 'Please enter your inquiry'});
+  }
+});
+
 server.get('/rooms', (req, res) => {
   const hotelId = req.query.hotel_id;
 

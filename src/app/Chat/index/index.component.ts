@@ -36,14 +36,17 @@ export class IndexComponent implements OnInit {
   lastname: string = '';
   email: string = '';
   regionId: number = 0;
+  filteredRegions: any[] = [];
   minDate: string = '';
   minEndDate: string = '';
   maxEndDate: string = '';
+
 
   messages: {
     sender: 'bot' | 'user' | undefined;
     text: string;
   }[] = [];
+
 
   constructor(private http: HttpClient, private user_form: FormBuilder) {}
 
@@ -144,9 +147,35 @@ export class IndexComponent implements OnInit {
         this.updateMinEndDate(startDate);
       }
     });
-  }
 
-  chooseOption(option: string) {
+
+  }
+//********************* */  FILTER REGION INFORMATION**************
+searchRegion(event: Event) {
+  const inputElement = event.target as HTMLInputElement;
+  const query = inputElement.value;
+//  console.log(query);
+  if (query.length > 0) {
+    this.http.get<any[]>(`http://localhost:3000/region?name=${query}`)
+      .subscribe((response: any) => {
+        this.filteredRegions = response.data;
+        console.log(response.data);
+
+      });
+  } else {
+    this.filteredRegions = [];
+  }
+}
+
+// Handle the selection of a region
+selectRegion(region: any) {
+  // this.region = region.name;
+          // Update the form control with the selected region name
+  this.userForm.get('region')?.setValue(region.name);
+  this.filteredRegions = []; // Clear the suggestions after selection
+}
+// *****************************************************************
+chooseOption(option: string) {
     this.userChoice = option;
     this.messages = [];
 
@@ -166,8 +195,12 @@ export class IndexComponent implements OnInit {
   }
 
   nextStep() {
+
+
     switch (this.currentStep) {
       case 1:
+        if(this.userForm.get('region')?.valid)
+      // fetch all region Name information hereee
         if (this.userForm.get('region')?.valid) {
           // Proceed to next step
           this.region = this.userForm.get('region')?.value;
@@ -184,8 +217,16 @@ export class IndexComponent implements OnInit {
             text: 'Please enter a valid region before proceeding.',
             sender: 'bot'
           });
+          this.filteredRegions = []; // Clear the suggestions after moving to the next step
+          this.currentStep = 2;
+        }else{
+          this.messages.push({
+            text: 'Please You Must Enter Region...!',
+            sender: 'bot',
+          });
         }
-        break;
+    break;
+
       case 2:
         // Retrieve date values from form controls
         const startDate = this.userForm.get('startDate')?.value;

@@ -77,8 +77,8 @@
                     </li>
                   </ul>
 
+                  <button class="btn btn-sm border-warning rounded mt-2" (click)="returnStep()"><i class="fas fa-step-backward fa-sm text-warning fa-fw"></i></button> &nbsp;
                   <button class="btn btn-sm btn-primary mt-2" [disabled]="userForm.get('region')?.invalid" (click)="nextStep()">Next</button>
-                <button class="btn btn-sm border-warning rounded mt-2" (click)="returnStep()"><i class="fas fa-step-backward fa-sm text-warning fa-fw"></i></button> &nbsp;
 
                 </div>
 

@@ -135,4 +135,11 @@ html, body {
 .user-message::after {
   right: -10px;
 }
+#regionInput
+{
+  cursor: pointer;
+}
+
+
+html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

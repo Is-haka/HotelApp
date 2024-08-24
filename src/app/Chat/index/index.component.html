@@ -20,13 +20,13 @@
             </div>
 
             <!-- Display options initially -->
-            <div *ngIf="currentStep === 0" class="row g-3">
+            <div *ngIf="currentStep === 0 && currentComplainStep === 0" class="row g-3">
               <div class="col-md-6">
                 <div
                   class="card h-100 cursor-pointer hover-shadow"
                   (click)="chooseOption('Booking')"
                 >
-                  <div class="card-body text-center d-flex flex-column justify-content-center">
+                  <div class="card-body text-center text-md-start d-flex flex-column justify-content-center">
                     <h5 class="card-title">Booking <i class="fas fa-link fa-xm fa-fw text-primary"></i> </h5>
                     <p class="card-text">Start booking a room</p>
                   </div>
@@ -35,9 +35,9 @@
               <div class="col-md-6">
                 <div
                   class="card h-100 cursor-pointer hover-shadow"
-                  (click)="chooseOption('Complaints/Inquiry')"
+                  (click)="[chooseOption('Complaints/Inquiry')]"
                 >
-                  <div class="card-body text-center d-flex flex-column justify-content-center">
+                  <div class="card-body text-center text-md-start d-flex flex-column justify-content-center">
                     <h5 class="card-title">Complaints/Inquiry <i class="fas fa-link fa-xm fa-fw text-primary"></i> </h5>
                     <p class="card-text">Submit a complaint or inquiry</p>
                   </div>
@@ -68,7 +68,7 @@
                     <div *ngIf="userForm.get('region')?.errors?.['minlength']">Region must be at least 4 characters long.</div>
                   </div>
                   <!-- Dropdown for displaying filtered region suggestions -->
-                  <ul *ngIf="filteredRegions.length > 0" class="list-group mt-2">
+                  <ul *ngIf="filteredRegions && filteredRegions.length > 0" class="list-group mt-2">
                     <li *ngFor="let region of filteredRegions"
                         class="list-group-item list-group-item-action"
                         id="regionInput"
@@ -265,16 +265,17 @@
 
             <!-- Complaints/Inquiry process -->
             <div *ngIf="userChoice === 'Complaints/Inquiry'" class="mt-4">
-              <div *ngIf="currentStep === 1" class="mb-3 text-start">
-                <span class="badge badge-sm bg-light text-dark">Click 'Yes' for inquiry or 'No' for complaints about a booking</span>
-                <div class="d-flex position-relative justify-content-start">
+              <div *ngIf="currentComplainStep === 1" class="mb-3 text-start">
+                <span class="p-2 rounded bg-light text-dark">Click <strong>'Yes'</strong> for inquiry or <strong>'No'</strong> for complaints about a booking</span>
+                <div class="d-flex align-items-center position-relative justify-content-start mt-2">
+                  <button class="btn btn-sm border-warning rounded" (click)="returnStep()"><i class="fas fa-step-backward fa-sm text-warning fa-fw"></i></button> &nbsp;
                   <button (click)="handleYesNo('Yes')" class="btn btn-sm btn-primary m-2">Yes</button>
                   <button (click)="handleYesNo('No')" class="btn btn-sm btn-outline-secondary rounded-circle m-2">No</button>
                 </div>
               </div>
               <form [formGroup]="userForm">
-                <div *ngIf="currentStep === 2 && isInquiry" class="mb-3">
-                  <div class="form-group form-floating m-2">
+                <div *ngIf="currentComplainStep === 2 && isInquiry" class="mb-3">
+                  <div class="form-group m-2">
                     <input
                     type="text"
                     class="form-control form-control-sm"
@@ -285,11 +286,11 @@
                     }"
                     >
                     <div class="invalid-feedback">
-                      <small *ngIf="userForm.get('fullname')?.errors?.['minlength']">Last name must be at least 4 characters long.</small>
+                      <small *ngIf="userForm.get('fullname')?.errors?.['required']">Fullname is required.</small>
+                      <small *ngIf="userForm.get('fullname')?.errors?.['minlength']">Fullname must be at least 4 characters long.</small>
                     </div>
-                    <label for="Your fullname">Your fullname</label>
                   </div>
-                  <div class="form-group form-floating m-2">
+                  <div class="form-group m-2">
                     <input
                     type="text"
                     class="form-control form-control-sm"
@@ -303,70 +304,152 @@
                       <small *ngIf="userForm.get('phone')?.errors?.['required']">phone number is required.</small>
                       <small *ngIf="userForm.get('phone')?.errors?.['minlength']">Enter a 10 digit of your phone valid number.</small>
                     </div>
-                    <label for="Your phone number">Your phone number</label>
                   </div>
-                  <div class="form-group form-floating m-2">
-                    <textarea
-                    class="form-control form-control-sm"
-                    formControlName="inquiryText"
-                    placeholder="Enter your inquiry"
-                    [ngClass]="{'is-invalid': userForm.get('inquiryText')?.invalid && (userForm.get('inquiryText')?.dirty || userForm.get('inquiryText')?.touched),
-                      'is-valid': userForm.get('inquiryText')?.valid && (userForm.get('inquiryText')?.dirty || userForm.get('inquiryText')?.touched)
-                    }"
-                    (keyup.enter)="nextStep()"
-                    >
-                  </textarea>
-                  <div class="invalid-feedback">
-                    <small *ngIf="userForm.get('inquiryText')?.errors?.['required']">Please enter your inquiry.</small>
-                    <small *ngIf="userForm.get('inquiryText')?.errors?.['minlength']">Inquiry needs at least 10 characters long of message.</small>
-                  </div>
-                  <label for="inquiryTextarea">Enter your inquiry</label>
-                  </div>
+                  <button class="btn btn-sm border-warning rounded" (click)="returnStep()"><i class="fas fa-step-backward fa-sm text-warning fa-fw"></i></button> &nbsp;
                 <button
                   class="btn btn-sm btn-primary m-2"
-                  [disabled]="userForm.get('fullname')?.invalid || userForm.get('phone')?.invalid || userForm.get('inquiryText')?.invalid"
-                  (click)="nextStep()"
+                  [disabled]="userForm.get('fullname')?.invalid || userForm.get('phone')?.invalid"
+                  (click)="complainStep()"
                   >
                   next
               </button>
                 </div>
-                <div *ngIf="currentStep === 3 && isInquiry" class="mb-3 form-floating">
-                  <input
+                <div *ngIf="currentComplainStep === 3" class="mb-3">
+                  <div *ngFor="let types of typeOfInquiry">
+                    <ul class="list-group">
+                      <li class="list-group-item list-group-item-action mb-1" id="filterSuggestion" (click)="typeInquirySelected(types.id)">{{types.inquiry}}</li>
+                    </ul>
+                  </div>
+                </div>
+                <div *ngIf="currentComplainStep === 4" class="mb-3 text-start">
+                  <span class="p-2 rounded bg-light text-dark">Click <strong>'Yes'</strong> if you have more details or <strong>'No'</strong> to submit your inquiry</span>
+                    <div class="d-flex align-items-center position-relative justify-content-start mt-2">
+                      <button class="btn btn-sm border-warning rounded" (click)="returnStep()"><i class="fas fa-step-backward fa-sm text-warning fa-fw"></i></button> &nbsp;
+                      <button (click)="yesNo('Yes')" class="btn btn-sm btn-primary m-2">Yes</button>
+                      <button (click)="yesNo('No')" class="btn btn-sm btn-outline-secondary rounded-circle m-2">No</button>
+                    </div>
+                </div>
+                <div *ngIf="currentComplainStep === 5" class="mb-3">
+                    <textarea
+                    class="form-control"
+                    id="additionalDetailsTextarea"
+                    placeholder="Enter additional details"
+                    formControlName="additionalDetails"
+                    [ngClass]="{'is-invalid': userForm.get('additionalDetails')?.invalid && (userForm.get('additionalDetails')?.dirty || userForm.get('additionalDetails')?.touched),
+                      'is-valid': userForm.get('additionalDetails')?.valid && (userForm.get('additionalDetails')?.dirty || userForm.get('additionalDetails')?.touched)
+                    }"
+                    (keyup.enter)="complainStep()">
+                    <div class="invalid-feedback">
+                      <small *ngIf="userForm.get('additionalDetails')?.errors?.['required']">This field is required.</small>
+                      <small *ngIf="userForm.get('additionalDetails')?.errors?.['minlength']">Minimum lenght of additional message is '10' character long.</small>
+                    </div>
+                  </textarea>
+                </div>
+                <div *ngIf="currentComplainStep === 5" class="d-grid">
+                  <button
+                  class="btn btn-primary"
+                  [disabled]="userForm.get('additionalDetails')?.invalid"
+                  (click)="complainStep()"
+                  >
+                  Submit
+                </button>
+                </div>
+                <div *ngIf="currentComplainStep === 6" class="mb-3">
+                  {{botAnswer}}
+                </div>
+                <div *ngIf="currentComplainStep === 7" class="mb-3 ">
+                  <div class="form-group m-2">
+                    <input
                   type="text"
                   class="form-control"
                   id="bookingNumberInput"
-                  placeholder=""
+                  placeholder="Enter your booking number eg. BK1234"
                   formControlName="bookingNumber"
                   [ngClass]="{'is-invalid': userForm.get('bookingNumber')?.invalid && (userForm.get('bookingNumber')?.dirty || userForm.get('bookingNumber')?.touched),
                       'is-valid': userForm.get('bookingNumber')?.valid && (userForm.get('bookingNumber')?.dirty || userForm.get('bookingNumber')?.touched)
                     }"
-                  (keyup.enter)="nextStep()"
+                    (input)="searchBookingNo($event)"
                   >
                   <div class="invalid-feedback">
-                    <small *ngIf="userForm.get('bookingNumber')?.errors?.['required']">Book number is required.</small>
+                    <small *ngIf="userForm.get('bookingNumber')?.errors?.['minlength']">Book number is required.</small>
                   </div>
-                  <label for="bookingNumberInput">Enter your booking number</label>
-                </div>
-
-                <div *ngIf="currentStep === 4" class="mb-3 text-start">
-                  <span class="badge badge-sm bg-light text-dark">Click 'Yes' if you have more details or 'No' to submit your complaint</span>
-                  <div class="d-flex position-relative justify-content-start">
-                    <button (click)="yesNo('Yes')" class="btn btn-sm btn-primary m-2">Yes</button>
-                    <button (click)="yesNo('No')" class="btn btn-sm btn-outline-secondary rounded-circle m-2">No</button>
+                  <button class="btn btn-sm btn-primary mt-2" [disabled]="userForm.get('bookingNumber')?.invalid " (click)="complainStep()">Next</button>
+                  <ul *ngIf="filterdBookNo && filterdBookNo.length > 0" class="list-group mt-2">
+                    <li
+                    *ngFor="let bkn of filterdBookNo"
+                    class="list-group-item list-group-item-action mb-1"
+                    id="filterSuggestion"
+                    (click)="selectBookNo(bkn)"
+                    >
+                    {{bkn.book_no}}
+                    </li>
+                  </ul>
                   </div>
                 </div>
-                <div *ngIf="currentStep === 5" class="mb-3 form-floating">
-                  <textarea
-                  class="form-control"
-                  id="additionalDetailsTextarea"
-                  placeholder=""
-                  formControlName="additionalDetails"
-                  (keyup.enter)="nextStep()">
-                </textarea>
-                  <label for="additionalDetailsTextarea">Enter additional details</label>
+                <div *ngIf="currentComplainStep === 8" class="mb-3">
+                    <div *ngFor="let return of returnedBookingDetails">
+                      <div class="card p-3 shadow-sm">
+                        <div class="card-title text-center">
+                          <span class="text-uppercase text-primary"><strong>{{return.firstname}}</strong></span> BOOKING DETAILS
+                        </div>
+                        <div class="card-body">
+                          <p class="text-capitalize"><strong>BOOKING NUMBER:</strong> {{return.book_no}}</p>
+                          <p class="text-capitalize"><strong>Fullname: </strong>{{return.firstname}} {{return.lastname}}</p>
+                          <p class="text-capitalize"><strong>Email address: </strong>{{return.email}}</p>
+                          <p class="text-capitalize"><strong>Region: </strong>{{return.region}}</p>
+                          <p class="text-capitalize"><strong>Hotel: </strong>{{return.hotel}}</p>
+                          <p class="text-capitalize"><strong>Room type: </strong>{{return.room}}</p>
+                          <p class="text-capitalize"><strong>Duration: </strong>{{return.duration}}</p>
+                          <p class="text-capitalize"><strong>Book created: </strong>{{return.created_at}}</p>
+                          <p class="text-capitalize"><strong>Check-in: </strong>{{return.start_date}}</p>
+                          <p class="text-capitalize"><strong>Check-out: </strong>{{return.end_date}}</p>
+                        </div>
+                        <div class="card-footer bg-white">
+                          <span class="p-2 rounded bg-light text-dark">Click <strong>'Yes'</strong> if this information is correct <strong>'No'</strong> if not</span>
+                          <div class="d-flex align-items-center position-relative justify-content-start mt-2">
+                            <button class="btn btn-sm border-warning rounded" (click)="returnStep()"><i class="fas fa-step-backward fa-sm text-warning fa-fw"></i></button> &nbsp;
+                            <button (click)="[handleYesNo('Yes'), fetchComplain()]" class="btn btn-sm btn-primary m-2">Yes</button>
+                            <button (click)="handleYesNo('No')" class="btn btn-sm btn-outline-secondary rounded-circle m-2">No</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                 </div>
-                <div *ngIf="currentStep === 5" class="d-grid">
-                  <button class="btn btn-primary" (click)="nextStep()">Submit</button>
+                <div *ngIf="currentComplainStep === 9" class="mb-3">
+                  <div *ngFor="let types of typeOfComplain">
+                    <ul class="list-group">
+                      <li class="list-group-item list-group-item-action mb-1" id="filterSuggestion" (click)="typeSelected(types.id)">{{types.type}}</li>
+                    </ul>
+                  </div>
+                </div>
+                <div *ngIf="currentComplainStep === 10" class="mb-3">
+                  <span class="p-2 rounded bg-light text-dark">Click <strong>'Yes'</strong> if satisfactory or <strong>'No'</strong> for more answer</span>
+                    <div class="d-flex align-items-center position-relative justify-content-start mt-2">
+                      <button class="btn btn-sm border-warning rounded" (click)="returnStep()"><i class="fas fa-step-backward fa-sm text-warning fa-fw"></i></button> &nbsp;
+                      <button (click)="[handleYesNo('Yes'), fetchBooking()]" class="btn btn-sm btn-primary m-2">Yes</button>
+                      <button (click)="handleYesNo('No')" class="btn btn-sm btn-outline-secondary rounded-circle m-2">No</button>
+                    </div>
+                </div>
+                <div *ngIf="currentComplainStep === 11" class="mb-3">
+                  <div *ngIf="relatedComplain && relatedComplain.length > 0" class="mb-3">
+                    <ul class="list-group">
+                      <li
+                        *ngFor="let item of relatedComplain"
+                        class="list-group-item list-group-item-action mb-1"
+                        (click)="onComplainSelect(item.rid)"
+                        id="filterSuggestion"
+                      >
+                        {{ item.complain }}
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                <div *ngIf="currentComplainStep === 12" class="mb-3">
+                  <div *ngIf="relatedCompAnswer && relatedCompAnswer.length > 0" class="mt-3">
+                    <div *ngFor="let answer of relatedCompAnswer" class="answer">
+                      <p>{{ answer.answer_complain }}</p>
+                    </div>
+                  </div>
                 </div>
               </form>
             </div>

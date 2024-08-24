@@ -239,9 +239,14 @@ selectBookNo(bkNo: any) {
 
 //Method to get back one step
 returnStep() {
-  this.currentStep = this.currentStep - 1;
-  this.currentComplainStep = this.currentComplainStep - 1;
-  this.messages.pop();
+  if(this.currentStep > 0) {
+    this.currentStep = this.currentStep - 1;
+    this.messages.pop();
+  }
+  if(this.currentComplainStep > 0) {
+    this.currentComplainStep = this.currentComplainStep - 1;
+    this.messages.pop();
+  }
   this.noRegion = 0;
 }
 

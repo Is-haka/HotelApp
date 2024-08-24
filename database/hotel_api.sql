@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 17, 2024 at 12:27 PM
+-- Generation Time: Aug 24, 2024 at 01:26 PM
 -- Server version: 10.4.25-MariaDB
 -- PHP Version: 8.1.10
 
@@ -30,7 +30,70 @@ SET time_zone = "+00:00";
 CREATE TABLE `anscomp` (
   `id` int(11) NOT NULL,
   `type_id` int(11) NOT NULL,
-  `answer` varchar(500) NOT NULL
+  `answer` varchar(1000) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `anscomp`
+--
+
+INSERT INTO `anscomp` (`id`, `type_id`, `answer`) VALUES
+(1, 1, 'Thank you for reaching out regarding your refund request. Based on our policy, refunds are processed within 7-10 business days from the date of the request. If your booking is eligible for a refund, the amount will be credited back to the original payment method used during the booking. Please ensure that all necessary documents and information are provided to avoid delays. If you have any further questions or need additional assistance, feel free to ask.\r\n'),
+(2, 2, 'We understand that you would like to extend your stay. To extend the number of days for your current booking, please note that this will depend on the availability of rooms. If available, the additional cost will be calculated based on the current rates and any applicable discounts. We recommend contacting our support team as soon as possible to confirm the extension. If you need further assistance or have additional questions, please let us know.\r\n');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ansinquiry`
+--
+
+CREATE TABLE `ansinquiry` (
+  `id` int(11) NOT NULL,
+  `answer` varchar(255) NOT NULL,
+  `inquirytype_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `ansinquiry`
+--
+
+INSERT INTO `ansinquiry` (`id`, `answer`, `inquirytype_id`) VALUES
+(1, 'To book, simply use this portal by click on booking then select your desired package, and follow the easy checkout process.', 1),
+(2, 'Yes, we offer seasonal discounts and special rates for group bookings. Please use this portal and select the booking option at the very first of this conversation.', 2),
+(3, 'You can reach us by flying into the nearest airport, where we provide a complimentary transfer to our location. Detailed directions will be provided in your booking confirmation.', 3);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ans_related_complain`
+--
+
+CREATE TABLE `ans_related_complain` (
+  `id` int(11) NOT NULL,
+  `answer_complain` varchar(2000) NOT NULL,
+  `related_c_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `ans_related_complain`
+--
+
+INSERT INTO `ans_related_complain` (`id`, `answer_complain`, `related_c_id`) VALUES
+(1, 'We understand your concern. The cost of extending a stay is based on room availability and rates. Please contact our reservations team to discuss options and pricing.', 3),
+(2, 'We apologize for any confusion. Refund amounts depend on the cancellation policy and timing. Share your booking details with us, and we’ll clarify the amount', 1),
+(3, 'We’re sorry to hear that you’re dissatisfied. Full refunds are processed according to our policy. Please provide your booking information, and we’ll review your request as soon as possible.', 2),
+(4, 'We apologize for the delay. Extensions are typically processed within a few hours, depending on room availability. Please reach out to the front desk or reservations team for quicker assistance.', 4);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ans_related_inquiry`
+--
+
+CREATE TABLE `ans_related_inquiry` (
+  `id` int(11) NOT NULL,
+  `answer_inquiry` varchar(2000) NOT NULL,
+  `related_i_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -74,7 +137,13 @@ INSERT INTO `booking` (`id`, `book_no`, `bk_status`, `firstname`, `lastname`, `e
 (76, 'BK3914', 1, 'asdafa', 'dsasdas', 'asdad@asdada', 1, 6, 1, 1, '2024-08-23 21:00:00', '2024-08-29 21:00:00', 1, '2024-08-17 05:04:34', '2024-08-17 05:04:34', NULL),
 (77, 'BK256', 1, 'adfasda', 'hahaha', 'hahah@aaha.com', 2, 7, 1, 1, '2024-08-23 21:00:00', '2024-08-30 21:00:00', 1, '2024-08-17 07:36:03', '2024-08-17 07:36:03', NULL),
 (78, 'BK9048', 1, 'asdasdsa', 'asdasda', 'asdsad@asdas', 4, 8, 1, 2, '2024-08-22 21:00:00', '2024-08-30 21:00:00', 1, '2024-08-17 08:11:08', '2024-08-17 08:11:08', NULL),
-(79, 'BK1053', 1, 'qwerty', 'wert', 'ertyu@asd', 4, 6, 1, 2, '2024-08-22 21:00:00', '2024-08-28 21:00:00', 1, '2024-08-17 09:35:42', '2024-08-17 09:35:42', NULL);
+(79, 'BK1053', 1, 'qwerty', 'wert', 'ertyu@asd', 4, 6, 1, 2, '2024-08-22 21:00:00', '2024-08-28 21:00:00', 1, '2024-08-17 09:35:42', '2024-08-17 09:35:42', NULL),
+(80, 'BK3769', 1, 'ishaka', 'mbarouk', 'ishaqa@gmail.com', 4, 4, 1, 2, '2024-08-16 21:00:00', '2024-08-20 21:00:00', 1, '2024-08-17 14:36:24', '2024-08-17 14:36:24', NULL),
+(81, 'BK4389', 1, 'ishak', 'hamad', 'mbarouk@gmail.com', 3, 27, 1, 2, '2024-08-30 21:00:00', '2024-09-26 21:00:00', 1, '2024-08-18 07:21:39', '2024-08-18 07:21:39', NULL),
+(82, 'BK1734', 1, 'aaaa', 'aaaa', 'aa@aa.aa', 2, 14, 1, 1, '2024-08-22 21:00:00', '2024-09-05 21:00:00', 1, '2024-08-23 07:22:59', '2024-08-23 07:22:59', NULL),
+(83, 'BK5086', 1, 'ggggggggggggg', 'ffffffffff', 'aa@a.c', 2, 5, 1, 1, '2024-08-23 21:00:00', '2024-08-28 21:00:00', 1, '2024-08-24 01:57:49', '2024-08-24 01:57:49', NULL),
+(84, 'BK8664', 1, 'Ishak', 'Mbarouk', 'ishak.mbarouk@me.com', 4, 4, 1, 2, '2024-08-23 21:00:00', '2024-08-27 21:00:00', 1, '2024-08-24 11:14:38', '2024-08-24 11:14:38', NULL),
+(85, 'BK851', 1, 'Ishak', 'Mbarouk', 'im@gmail.com', 4, 2, 1, 2, '2024-08-23 21:00:00', '2024-08-25 21:00:00', 1, '2024-08-24 11:26:06', '2024-08-24 11:26:06', NULL);
 
 -- --------------------------------------------------------
 
@@ -88,7 +157,8 @@ CREATE TABLE `complain` (
   `phone` varchar(15) NOT NULL,
   `book_no` int(11) DEFAULT NULL,
   `typeOfcomplain` int(11) DEFAULT NULL,
-  `customDesc` varchar(500) NOT NULL,
+  `typeOfInquiry` int(11) DEFAULT NULL,
+  `customDesc` varchar(500) DEFAULT NULL,
   `replied` tinyint(1) DEFAULT 0,
   `status` varchar(50) NOT NULL DEFAULT 'pending',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
@@ -98,8 +168,22 @@ CREATE TABLE `complain` (
 -- Dumping data for table `complain`
 --
 
-INSERT INTO `complain` (`id`, `fullname`, `phone`, `book_no`, `typeOfcomplain`, `customDesc`, `replied`, `status`, `created_at`) VALUES
-(1, 'qwertyu', '071234567855', NULL, NULL, 'fsfdfgfgdfd\n', 0, 'pending', '2024-08-17 10:16:03');
+INSERT INTO `complain` (`id`, `fullname`, `phone`, `book_no`, `typeOfcomplain`, `typeOfInquiry`, `customDesc`, `replied`, `status`, `created_at`) VALUES
+(1, 'qwertyu', '071234567855', NULL, NULL, 1, 'fsfdfgfgdfd\n', 0, 'pending', '2024-08-17 10:16:03'),
+(2, 'asaas', '0876675765765', NULL, NULL, 1, 'dasddsadadad\n', 0, 'pending', '2024-08-18 07:23:46'),
+(3, 'iska', '0756123111111', NULL, NULL, 1, 'adsadadasdsadasasdasdasdsadasdasdasd', 0, 'pending', '2024-08-23 14:37:13'),
+(4, 'customDesc', 'customDesccusto', NULL, NULL, NULL, 'customDesc', 0, 'pending', '2024-08-24 04:11:50'),
+(5, 'customDesc', 'customDesccusto', NULL, NULL, NULL, 'customDesc', 0, 'pending', '2024-08-24 04:13:33'),
+(6, 'text-center text-md-start', 'text-center tex', NULL, NULL, NULL, 'text-center text-md-start\n', 0, 'pending', '2024-08-24 04:21:22'),
+(7, 'p-2 rounded bg-light text-dark', 'p-2 rounded bg-', NULL, NULL, NULL, 'p-2 rounded bg-light text-dark', 0, 'pending', '2024-08-24 04:31:46'),
+(8, 'typeOfInquiry', 'typeOfInquiry', NULL, NULL, 1, 'typeOfInquiry', 0, 'pending', '2024-08-24 04:35:59'),
+(9, 'typeOfInquiry', 'typeOfInquiry', NULL, NULL, 3, 'Second for id 2', 0, 'pending', '2024-08-24 04:36:32'),
+(10, 'typeOfInquiry', '0712345678934', NULL, NULL, 2, 'group bookings. ', 0, 'pending', '2024-08-24 04:39:43'),
+(11, 'Is-haka', '0715641114', NULL, NULL, 2, 'How about from 50,000 TZS', 0, 'pending', '2024-08-24 04:45:35'),
+(12, 'Ishak', '0715641114', NULL, NULL, 3, 'hello there how are you doing today, thanks for the reply', 0, 'pending', '2024-08-24 10:52:49'),
+(13, 'Ishak', '0715641114', NULL, NULL, 2, 'Thank you so much', 0, 'pending', '2024-08-24 11:02:44'),
+(14, 'Ishak', '0715641114', NULL, NULL, 3, 'Hello there', 0, 'pending', '2024-08-24 11:06:27'),
+(15, 'Ishak', '0715641114', NULL, NULL, 3, 'Hello there', 0, 'pending', '2024-08-24 11:08:03');
 
 -- --------------------------------------------------------
 
@@ -211,6 +295,40 @@ INSERT INTO `region` (`id`, `name`, `created_at`, `updated_at`, `deleted_at`) VA
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `related_complain`
+--
+
+CREATE TABLE `related_complain` (
+  `id` int(11) NOT NULL,
+  `related_complain` varchar(255) NOT NULL,
+  `type_c_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `related_complain`
+--
+
+INSERT INTO `related_complain` (`id`, `related_complain`, `type_c_id`) VALUES
+(1, 'The refund process is so confusing! I don\'t even know how much I\'ll get back.', 1),
+(2, 'I’m really disappointed with the service and want a full refund', 1),
+(3, 'Extending my stay shouldn’t be so costly! It feels like I\'m being overcharged.', 2),
+(4, 'Why does it take so long to extend my stay? This process is too slow!', 2);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `related_inquiry`
+--
+
+CREATE TABLE `related_inquiry` (
+  `id` int(11) NOT NULL,
+  `related_inquiry` varchar(2000) NOT NULL,
+  `type_i_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `room`
 --
 
@@ -249,8 +367,28 @@ CREATE TABLE `typeofcomp` (
 --
 
 INSERT INTO `typeofcomp` (`id`, `type`) VALUES
-(1, 'Funding'),
+(1, 'Refunding'),
 (2, 'Days Extension');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `typeofinquiry`
+--
+
+CREATE TABLE `typeofinquiry` (
+  `id` int(11) NOT NULL,
+  `inquiry` varchar(2000) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `typeofinquiry`
+--
+
+INSERT INTO `typeofinquiry` (`id`, `inquiry`) VALUES
+(1, 'How to book?'),
+(2, 'Are there discounts?'),
+(3, 'How to get there?');
 
 -- --------------------------------------------------------
 
@@ -287,6 +425,27 @@ ALTER TABLE `anscomp`
   ADD KEY `type_id` (`type_id`);
 
 --
+-- Indexes for table `ansinquiry`
+--
+ALTER TABLE `ansinquiry`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `inquirytype_id` (`inquirytype_id`);
+
+--
+-- Indexes for table `ans_related_complain`
+--
+ALTER TABLE `ans_related_complain`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `ans_related_complain_ibfk_1` (`related_c_id`);
+
+--
+-- Indexes for table `ans_related_inquiry`
+--
+ALTER TABLE `ans_related_inquiry`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `related_i_id` (`related_i_id`);
+
+--
 -- Indexes for table `booking`
 --
 ALTER TABLE `booking`
@@ -300,7 +459,8 @@ ALTER TABLE `booking`
 --
 ALTER TABLE `complain`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `typeOfcomplain` (`typeOfcomplain`);
+  ADD KEY `typeOfcomplain` (`typeOfcomplain`),
+  ADD KEY `fk_typeOfInquiry` (`typeOfInquiry`);
 
 --
 -- Indexes for table `complaints`
@@ -331,6 +491,20 @@ ALTER TABLE `region`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `related_complain`
+--
+ALTER TABLE `related_complain`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `type_id` (`type_c_id`);
+
+--
+-- Indexes for table `related_inquiry`
+--
+ALTER TABLE `related_inquiry`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `type_i_id` (`type_i_id`);
+
+--
 -- Indexes for table `room`
 --
 ALTER TABLE `room`
@@ -341,6 +515,12 @@ ALTER TABLE `room`
 -- Indexes for table `typeofcomp`
 --
 ALTER TABLE `typeofcomp`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `typeofinquiry`
+--
+ALTER TABLE `typeofinquiry`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -358,19 +538,37 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `anscomp`
 --
 ALTER TABLE `anscomp`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `ansinquiry`
+--
+ALTER TABLE `ansinquiry`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `ans_related_complain`
+--
+ALTER TABLE `ans_related_complain`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `ans_related_inquiry`
+--
+ALTER TABLE `ans_related_inquiry`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `booking`
 --
 ALTER TABLE `booking`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=80;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=86;
 
 --
 -- AUTO_INCREMENT for table `complain`
 --
 ALTER TABLE `complain`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `complaints`
@@ -397,6 +595,18 @@ ALTER TABLE `region`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
+-- AUTO_INCREMENT for table `related_complain`
+--
+ALTER TABLE `related_complain`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `related_inquiry`
+--
+ALTER TABLE `related_inquiry`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `room`
 --
 ALTER TABLE `room`
@@ -407,6 +617,12 @@ ALTER TABLE `room`
 --
 ALTER TABLE `typeofcomp`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `typeofinquiry`
+--
+ALTER TABLE `typeofinquiry`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -425,10 +641,29 @@ ALTER TABLE `anscomp`
   ADD CONSTRAINT `anscomp_ibfk_1` FOREIGN KEY (`type_id`) REFERENCES `typeofcomp` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
+-- Constraints for table `ansinquiry`
+--
+ALTER TABLE `ansinquiry`
+  ADD CONSTRAINT `ansinquiry_ibfk_1` FOREIGN KEY (`inquirytype_id`) REFERENCES `typeofinquiry` (`id`) ON DELETE SET NULL ON UPDATE SET NULL;
+
+--
+-- Constraints for table `ans_related_complain`
+--
+ALTER TABLE `ans_related_complain`
+  ADD CONSTRAINT `ans_related_complain_ibfk_1` FOREIGN KEY (`related_c_id`) REFERENCES `related_complain` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `ans_related_inquiry`
+--
+ALTER TABLE `ans_related_inquiry`
+  ADD CONSTRAINT `ans_related_inquiry_ibfk_1` FOREIGN KEY (`related_i_id`) REFERENCES `related_inquiry` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
 -- Constraints for table `complain`
 --
 ALTER TABLE `complain`
-  ADD CONSTRAINT `complain_ibfk_1` FOREIGN KEY (`typeOfcomplain`) REFERENCES `typeofcomp` (`id`);
+  ADD CONSTRAINT `complain_ibfk_1` FOREIGN KEY (`typeOfcomplain`) REFERENCES `typeofcomp` (`id`),
+  ADD CONSTRAINT `fk_typeOfInquiry` FOREIGN KEY (`typeOfInquiry`) REFERENCES `typeofinquiry` (`id`) ON DELETE SET NULL ON UPDATE SET NULL;
 
 --
 -- Constraints for table `hotel`
@@ -441,6 +676,18 @@ ALTER TABLE `hotel`
 --
 ALTER TABLE `location`
   ADD CONSTRAINT `location_ibfk_1` FOREIGN KEY (`region_id`) REFERENCES `region` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `related_complain`
+--
+ALTER TABLE `related_complain`
+  ADD CONSTRAINT `related_complain_ibfk_1` FOREIGN KEY (`type_c_id`) REFERENCES `typeofcomp` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `related_inquiry`
+--
+ALTER TABLE `related_inquiry`
+  ADD CONSTRAINT `related_inquiry_ibfk_1` FOREIGN KEY (`type_i_id`) REFERENCES `typeofinquiry` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `room`

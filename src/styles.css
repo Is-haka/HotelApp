@@ -11,6 +11,10 @@
   --font-weight-bold: 700;
   --font-weight-black: 900;
 
+
+  /* Font size */
+  --font-size: 13.5px;
+
   /* Font styles */
   --font-style-normal: normal;
   --font-style-italic: italic;
@@ -21,7 +25,9 @@ html, body {
   font-weight: var(--font-weight-light);
   font-style: var(--font-style-normal);
 }
-
+p, a, span, input, li {
+  font-size: var(--font-size);
+}
 .chat-container {
   padding: 10px;
   max-width: 600px;
@@ -85,13 +91,13 @@ html, body {
 }
 
 .bot-message {
-  background-color: #f0f0f0;
+  background-color: #e8e8ff;
   color: #000;
   margin-left: 12px;
 }
 
 .user-message {
-  background-color: #007bff;
+  background-color: #1b89ff;
   color: #fff;
   margin-right: 12px;
 }
@@ -108,13 +114,13 @@ html, body {
 .bot-message::before {
   left: -10px;
   border-bottom-right-radius: 16px 14px;
-  box-shadow: 6px 0 0 0 #f0f0f0;
+  box-shadow: 6px 0 0 0 #e8e8ff;
 }
 
 .user-message::before {
   right: -10px;
   border-bottom-left-radius: 16px 14px;
-  box-shadow: -6px 0 0 0 #007bff;
+  box-shadow: -6px 0 0 0 #1b89ff;
 }
 
 .bot-message::after,
@@ -140,6 +146,20 @@ html, body {
   cursor: pointer;
 }
 
-
-html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.list-group {
+  list-style: none;
+}
+#filterSuggestion {
+  cursor: pointer;
+}
+
+#filterSuggestion:focus {
+  outline: none !important;
+  box-shadow: none;
+}
+
+#filterSuggestion:hover {
+  box-shadow: 0 0 1px 1px rgba(201, 201, 201, 0.397);
+}

@@ -4,8 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start" : "nodemon server.js"
-
+    "start": "nodemon server.js"
   },
   "keywords": [],
   "author": "",
@@ -13,8 +12,12 @@
   "description": "",
   "dependencies": {
     "body-parser": "^1.20.2",
+    "connect-mysql2": "^2.2.6",
+    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "jsonwebtoken": "^9.0.2",
     "mysql": "^2.18.1",
     "mysql2": "^3.11.0"
   }

@@ -6,6 +6,7 @@ import { last } from 'rxjs';
 import { response } from 'express';
 import { error } from 'node:console';
 
+
 @Component({
   selector: 'app-index',
   standalone: true,
@@ -54,6 +55,10 @@ userForm!: FormGroup;
   minDate: string = '';
   minEndDate: string = '';
   maxEndDate: string = '';
+  // place to handle or hold token here
+  bookingTokens: number = 0; // To track the number of bookings
+  lastBookingTime: Date | null = null; // To track the time of the last booking
+
 
   typeOfComplain: any [] = [];
   typeOfInquiry: any [] = [];
@@ -907,61 +912,91 @@ chooseOption(option: string) {
 
 
   bookRoom() {
-    this.http
-      .get(`http://localhost:3000/region/id?name=${this.region}`)
-      .subscribe(
-        (response: any) => {
-          if (response.status) {
-            this.regionId = response.data;
-            this.regionName = response.name;
+    const now = new Date();
+    if (this.canBook(now)) {
+      this.http
+        .get(`http://localhost:3000/region/id?name=${this.region}`)
+        .subscribe(
+          (response: any) => {
+            if (response.status) {
+              this.regionId = response.data;
+              this.regionName = response.name;
 
-            this.http
-              .post(`http://localhost:3000/booking/create`, {
-                firstname: this.firstname,
-                lastname: this.lastname,
-                email: this.email,
-                room: this.selectedRoom,
-                duration: this.days,
-                hotel_id: this.selectedHotel,
-                region_id: this.regionId,
-                book_no: this.bookingNumber,
-                start_date: this.startDate,
-                end_date: this.endDate,
-              })
-              .subscribe(
-                (response: any) => {
-                  if (response.status) {
-                    this.bookingStatus = 'success';
-                  } else {
-                    this.bookingStatus = 'failed';
+              this.http
+                .post(`http://localhost:3000/booking/create`, {
+                  firstname: this.firstname,
+                  lastname: this.lastname,
+                  email: this.email,
+                  room: this.selectedRoom,
+                  duration: this.days,
+                  hotel_id: this.selectedHotel,
+                  region_id: this.regionId,
+                  book_no: this.bookingNumber,
+                  start_date: this.startDate,
+                  end_date: this.endDate,
+                })
+                .subscribe(
+                  (response: any) => {
+                    if (response.status) {
+                      this.bookingStatus = 'success';
+                      this.updateTokenTracking(now); // Update token tracking
+                      this.resetChat(); // Optionally reset chat after successful booking
+                    } else {
+                      this.bookingStatus = 'failed';
+                      this.messages.push({
+                        text: 'Booking failed. Please try again.',
+                        sender: 'bot',
+                      });
+                    }
+                  },
+                  (error) => {
                     this.messages.push({
-                      text: 'Booking failed. Please try again.',
+                      text: 'An error occurred while booking. Please try again later.',
                       sender: 'bot',
                     });
                   }
-
-                },
-                (error) => {
-                  this.messages.push({
-                    text: 'An error occurred while booking. Please try again later.',
-                    sender: 'bot',
-                  });
-                }
-              );
-          } else {
+                );
+            } else {
+              this.messages.push({
+                text: 'Region not found. Please try again.',
+                sender: 'bot',
+              });
+            }
+          },
+          (error) => {
             this.messages.push({
-              text: 'Region not found. Please try again.',
+              text: 'An error occurred while fetching region data. Please try again later.',
               sender: 'bot',
             });
           }
-        },
-        (error) => {
-          this.messages.push({
-            text: 'An error occurred while fetching region data. Please try again later.',
-            sender: 'bot',
-          });
-        }
-      );
+        );
+    } else {
+      this.messages.push({
+        text: 'You have exceeded the booking limits. Please wait before trying again.',
+        sender: 'bot',
+      });
+    }
+  }
+
+  canBook(now: Date): boolean {
+    if (!this.lastBookingTime) {
+      return true;
+    }
+    // ##########################################################################
+    const timeDiff = (now.getTime() - this.lastBookingTime.getTime()) / 1000; // Time difference in seconds
+    if (timeDiff > 60) { // Reset the token count after a minute
+      this.bookingTokens = 0;
+    }
+    // set booking limit through token
+    if (this.bookingTokens >= 2) { // Assuming the limit is 10 bookings in an hour
+      return false;
+    }
+    return true;
+  }
+
+  updateTokenTracking(now: Date): void {
+    this.bookingTokens++;
+    this.lastBookingTime = now;
   }
 
   startCountdown(duration: number) {

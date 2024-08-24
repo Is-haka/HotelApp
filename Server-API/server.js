@@ -2,14 +2,20 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mysql = require("mysql2");
 const cors = require("cors"); // Import cors middleware
-
 const server = express();
+const session = require('express-session');
+const cookieParser = require('cookie-parser');
+
 
 // Enable CORS for all origins
 server.use(cors());
-
 server.use(bodyParser.json());
-
+server.use(express.urlencoded({ extended: true }));
+server.use(cookieParser());
+//Test  Server if it Work
+server.get('/',(req,res)=>{
+  res.send("SERVER IS UNDER MAINTANANCE")
+})
 // Establish a database connection
 const connection = mysql.createConnection({
   host: "localhost",
@@ -26,8 +32,137 @@ connection.connect(function (error) {
     console.log("Successfully connected to database");
   }
 });
+// Create session to hold user information
+server.use(session({
+  secret: 'hotel_app', // Replace with a secure secret
+  resave: false,
+  saveUninitialized: true,
+  cookie: { maxAge: 1 * 60 * 1000 } // Set to 1 minute for testing
+  // cookie: { maxAge: 1 * 60 * 1000 } // Cookie expires in 5 minutes
+  // cookie: { maxAge: 3600000 } // Cookie expires in 1 hour
+}));
+
+// Step 2.2: Store and Retrieve Booking Information
+// Update the booking creation endpoint to store booking information in the session:
+
+//post api for booking for create
+server.post("/booking/create", (req, res) => {
+  const now = new Date();
+  const bookingInterval = 60000; // 1 minute
+  const bookingLimit = 2;
+
+  // Initialize session bookings if not present
+  if (!req.session.bookings) {
+    req.session.bookings = [];
+  }
+// Create session to hold user information
+server.use(session({
+  secret: 'hotel_app', // Replace with a secure secret
+  resave: false,
+  saveUninitialized: true,
+  cookie: { maxAge: 60 * 1000 } // Set to 1 minute for testing
+  // cookie: { maxAge: 1 * 60 * 1000 } // Cookie expires in 5 minutes
+  // cookie: { maxAge: 3600000 } // Cookie expires in 1 hour
+}));
+
+// Step 2.2: Store and Retrieve Booking Information
+// Update the booking creation endpoint to store booking information in the session:
+
+//post api for booking for create
+server.post("/booking/create", (req, res) => {
+  const now = new Date();
+  const bookingInterval = 60000; // 1 minute
+  const bookingLimit = 2;
+
+  // Initialize session bookings if not present
+  if (!req.session.bookings) {
+    req.session.bookings = [];
+  }
+
+  // Check booking limits
+  const recentBookings = req.session.bookings.filter(booking => now - new Date(booking.timestamp) < bookingInterval);
+  if (recentBookings.length >= bookingLimit) {
+    return res.send({ status: false, message: "Booking limit reached. Try again later." });
+  }
+
+  // Booking details from request
+  const details = {
+    firstname: req.body.firstname,
+    lastname: req.body.lastname,
+    email: req.body.email,
+    room: req.body.room,
+    duration: req.body.duration,
+    hotel_id: req.body.hotel_id,
+    region_id: req.body.region_id,
+    book_no: req.body.book_no,
+    start_date: req.body.start_date,
+    end_date: req.body.end_date
+  };
+
+  // Insert booking into database
+  const qry = "INSERT INTO booking SET ?";
+  connection.query(qry, details, (error) => {
+    if (error) {
+      console.log(error);
+      res.send({ status: false, message: "Booking failed." });
+    } else {
+      // Store booking in session
+      req.session.bookings.push({ ...details, timestamp: now });
+      res.send({ status: true, message: "Booking successful." });
+    }
+  });
+});
+
+  // Check booking limits
+  const recentBookings = req.session.bookings.filter(booking => now - new Date(booking.timestamp) < bookingInterval);
+  if (recentBookings.length >= bookingLimit) {
+    return res.send({ status: false, message: "Booking limit reached. Try again later." });
+  }
+
+  // Booking details from request
+  const details = {
+    firstname: req.body.firstname,
+    lastname: req.body.lastname,
+    email: req.body.email,
+    room: req.body.room,
+    duration: req.body.duration,
+    hotel_id: req.body.hotel_id,
+    region_id: req.body.region_id,
+    book_no: req.body.book_no,
+    start_date: req.body.start_date,
+    end_date: req.body.end_date
+  };
+
+  // Insert booking into database
+  const qry = "INSERT INTO booking SET ?";
+  connection.query(qry, details, (error) => {
+    if (error) {
+      console.log(error);
+      res.send({ status: false, message: "Booking failed." });
+    } else {
+      // Store booking in session
+      req.session.bookings.push({ ...details, timestamp: now });
+      res.send({ status: true, message: "Booking successful." });
+    }
+  });
+});
 
 
+
+
+
+server.get("/booking", (req,res) => {
+  var qry = "select * from booking";
+
+    connection.query(qry, (error, result) => {
+    if (error) {
+      res.send({ status: false, message: "Booking cannot be viewed" });
+    } else {
+      res.send({ status: true, data: result });
+    }
+  });
+
+});
 
 //post api to create a hotel
 server.post("/hotel/create", (req,res)=>{
@@ -105,11 +240,9 @@ server.post("/region/create", (req,res)=>{
   });
 
 });
-
-
 //************************************************************************************************* */
 
-              server.get('/region', (req, res) => {
+  server.get('/region', (req, res) => {
                 const regionName = req.query.name;
 
                 if (!regionName) {
@@ -297,13 +430,11 @@ server.get("/location", (req,res) => {
 
 });
 
-
 /*
  * Before pushing the booking into the database, we first fetch the region by name
  * in order to get the id of that region that will then going to be recorded into the
  * booking relation through this API endpoint
 */
-
 // API endpoint to get region ID by region name
 server.get('/region/id', (req, res) => {
   const regionName = req.query.name;
@@ -330,53 +461,9 @@ server.get('/region/id', (req, res) => {
   });
 });
 
-//post api for booking for create
-server.post("/booking/create", (req, res) => {
-  let details = {
-    firstname: req.body.firstname,
-    lastname: req.body.lastname,
-    email: req.body.email,
-    room: req.body.room,
-    duration: req.body.duration,
-    hotel_id: req.body.hotel_id,
-    region_id: req.body.region_id,
-    book_no: req.body.book_no,
-    start_date: req.body.start_date,
-    end_date: req.body.end_date
-  };
 
-  let qry = "insert into booking set ?";
-  connection.query(qry, details, (error) => {
-    if (error) {
-      console.log(error);
-      res.send({ status: false, message: "Booking failed." });
-    } else {
-      res.send({ status: true, message: "Booking successful." });
-    }
-  });
-});
-
-
-server.get("/booking", (req,res) => {
-  var qry = "select * from booking";
-
-    connection.query(qry, (error, result) => {
-    if (error) {
-      res.send({ status: false, message: "Booking cannot be viewed" });
-    } else {
-      res.send({ status: true, data: result });
-    }
-  });
-
-});
-
- /*
-  * Check room availability by considering their booking status, room id, and duration
-  * in the booking relation
-  */
 
   //API endpoint for the room availability in each hotel
-
   // API endpoint to get total bookings and available rooms for each hotel and room type
   server.get("/available", (req, res) => {
     const region_id = req.query.region_id;
@@ -417,10 +504,6 @@ server.get("/booking", (req,res) => {
       res.send({ status: true, data: result });
     });
   });
-
-
-
-
 
 // Handle and store complaint
 // server.post('/complaint/create', (req, res) => {

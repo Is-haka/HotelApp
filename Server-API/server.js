@@ -126,7 +126,7 @@ server.post("/region/create", (req,res)=>{
                 // Using `%${regionName}%` to match any part of the region name
                 connection.query(query, [`%${regionName}%`], (error, results) => {
                   if (error) {
-                    console.error('Database query error:', error);
+                    // console.error('Database query error:', error);
                     return res.status(500).send({ status: false, message: 'An error occurred while searching for regions' });
                   }
 
@@ -140,6 +140,132 @@ server.post("/region/create", (req,res)=>{
 
 
 //*************************************************** */
+
+
+//API endpoint to search bookNo from booking table
+server.get('/bookNo', (req, res) => {
+  const bookingNo = req.query.number;
+  const qry = `SELECT id, book_no FROM booking WHERE LOWER(book_no) LIKE LOWER(?)`;
+
+  // Using %${bookingNo}% to match any part of the booking number
+  connection.query(qry, [`%${bookingNo}%`], (error, results) => {
+    if(error) {
+      console.error("Error: ", error);
+      return res.status(500).send({ status: false, message: 'An error occurred while searching for booking number'});
+    }
+
+    if(results.length > 0) {
+      res.send({ status: true, data: results});
+    } else {
+      res.send({ status: false, message: 'No booking number match' });
+    }
+  });
+});
+
+
+//API endpoint to return data from booking of specific booking number
+server.get('/bkn', (req, res) => {
+  const bkn = req.query.bkn;
+  const qry = `SELECT
+                b.id AS id,
+                b.book_no AS book_no,
+                b.firstname AS firstname,
+                b.lastname AS lastname,
+                b.created_at AS created_at,
+                b.email AS email,
+                b.duration AS duration,
+                b.start_date AS start_date,
+                b.end_date AS end_date,
+                re.name AS region,
+                ro.type AS room,
+                h.name AS hotel
+                FROM
+                booking b
+                INNER JOIN region re ON
+                b.region_id = re.id
+                INNER JOIN room ro ON
+                b.room = ro.id
+                INNER JOIN hotel h ON
+                b.hotel_id = h.id
+                WHERE
+                b.book_no = ?`;
+
+  connection.query(qry, [`${bkn}`], (error, results) => {
+    if(error) {
+      console.log('Error: ', error);
+      return res.status(500).send({ status: false, message: 'An error occurred while fetching data of the particular book number'});
+    }
+
+    if(results.length > 0) {
+      res.send({ status: true, data: results});
+    } else {
+      res.send({ status: false, message: 'No data match' });
+    }
+  });
+});
+
+
+//API endpoint for fetching related complain based on the first choice
+server.get('/relatedType', (req, res) => {
+  const compId = req.query.compId;
+  console.log(compId);
+  const qry = `SELECT
+    related.id AS rid,
+    related.related_complain AS complain,
+    related.type_c_id AS tcid,
+    typec.type AS main_complain
+    FROM
+    related_complain related
+    INNER JOIN typeofcomp typec ON
+    related.type_c_id = typec.id
+    WHERE
+    typec.id = ?`
+    connection.query(qry, [`${compId}`], (error, results) => {
+      if(error) {
+        console.log("Error: ", error);
+        return res.status(500).send({ status: false, message: 'Error occurred while fetching the related complain using initial complain'});
+      }
+
+      if(results.length > 0) {
+        console.log(results);
+        res.send({ status: true, data: results});
+      } else {
+        res.send({ status: false, message: 'No more complain for that question'});
+      }
+    });
+});
+
+
+//API endpoint to fetch answer of related complain using main complain id
+server.get('/relatedAnswer', (req, res) => {
+  const relatedCompId = req.query.relatedCompId;
+  console.log(relatedCompId);
+  const qry = `SELECT
+    qnrelated.related_complain AS ask_complain,
+    ans.answer_complain AS answer_complain
+    FROM
+    related_complain qnrelated
+    INNER JOIN ans_related_complain ans ON
+    ans.related_c_id = qnrelated.id
+    WHERE
+    qnrelated.id = ?
+    `;
+    connection.query(qry, [`${relatedCompId}`], (error, results) => {
+      if(error) {
+        console.log("Error: ", error);
+        return res.status(500).send({ status: false, message: 'Error occurred while fetching the related complain answer using initial complain'});
+      }
+
+      if(results.length > 0) {
+        console.log(results);
+        res.send({ status: true, data: results});
+      } else {
+        res.send({ status: false, message: 'No more complain answer for that question'});
+      }
+    });
+});
+
+
 //post api for create location
 server.post("/location/create", (req,res)=>{
   let details = {
@@ -349,16 +475,82 @@ server.get("/booking", (req,res) => {
 
 // Handle and store complaint
 
+
+//API endpoint to get type of inquiry from typeofinquiry table
+server.get('/inquiryType', (req, res) => {
+  const qry = "SELECT * FROM typeofinquiry";
+  connection.query(qry, (error, result) => {
+    if(error) {
+      console.log(error);
+      res.send({ status: false, message: 'Failed to get type of complaint'});
+    } else {
+      console.log(result);
+      res.send({status: true, data: result});
+    }
+  });
+});
+
+//API endpoint to get answer of inquiry by inquiry type id from ansinquiry table
+server.get('/inquiryAnswer', (req, res) => {
+  const answer = req.query.answer;
+
+  if (!answer) {
+    return res.status(400).send({ status: false, message: 'inquiry_type ID is required.' });
+  }
+  let qry = "SELECT answer FROM ansinquiry WHERE inquirytype_id = ?";
+
+  connection.query(qry, [answer], (error, result) => {
+    if(error) {
+      console.log("error: ", error);
+      return res.status(500).send({status: false, message: 'Unable to fetch answer'});
+    }
+    console.log(result);
+    return res.status(201).send({status: true, data: result, message: 'answer fetched successfully'});
+  });
+});
+
+//API endpoint to get type of complaint from typeofcomp table
+server.get('/complainType', (req, res) => {
+  const qry = "SELECT * FROM typeofcomp";
+  connection.query(qry, (error, result) => {
+    if(error) {
+      console.log(error);
+      res.send({ status: false, message: 'Failed to get type of complaint'});
+    } else {
+      res.send({status: true, data: result});
+    }
+  });
+});
+
+//API endpoint to get answer of complaint by complaint type id from ansComp table
+server.get('/answer', (req, res) => {
+  const answer = req.query.answer;
+
+  if (!answer) {
+    return res.status(400).send({ status: false, message: 'complain_type ID is required.' });
+  }
+  let qry = "SELECT answer FROM anscomp WHERE type_id = ?";
+
+  connection.query(qry, [answer], (error, result) => {
+    if(error) {
+      console.log("error: ", error);
+      return res.status(500).send({status: false, message: 'Unable to fetch answer'});
+    }
+    return res.status(201).send({status: true, data: result, message: 'answer fetched successfully'});
+  });
+});
+
 //API endpoint for submitting inquiry to the complaints table
 server.post('/inquiry', (req, res) => {
+  const {inquiryId} = req.body;
   const {customDesc} = req.body;
   const {fullname} = req.body;
   const {phone} = req.body;
   console.log(req.body);
 
   if(customDesc && fullname && phone) {
-    const qry = "INSERT INTO complain(fullname, phone, customDesc) VALUES(?, ?, ?)";
-    connection.query(qry, [fullname, phone, customDesc], (error) => {
+    const qry = "INSERT INTO complain(fullname, phone, typeOfInquiry, customDesc) VALUES(?, ?, ?, ?)";
+    connection.query(qry, [fullname, phone, inquiryId, customDesc], (error) => {
       if(error) {
         console.log(error);
         res.send({ status: false, message: 'failed to submit inquiry'});

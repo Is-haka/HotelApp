@@ -238,7 +238,12 @@
                 <p><strong>Last Name:</strong> {{ lastname }}</p>
                 <p><strong>Email:</strong> {{ email }}</p>
                 <div *ngIf="bookingStatus !== 'success'" class="d-grid mt-3">
-                  <button class="btn btn-sm btn-primary" (click)="bookRoom()">Confirm Booking</button>
+                  <button
+                  class="btn btn-sm btn-primary"
+                  (click)="bookRoom()"
+                  >
+                  Confirm Booking
+                </button>
                 </div>
                 <!-- Booking Status Message -->
                 <div *ngIf="bookingStatus" class="mt-3 alert" [ngClass]="{

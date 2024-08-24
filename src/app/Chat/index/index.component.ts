@@ -1,9 +1,35 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ReactiveFormsModule ,ValidationErrors } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { last } from 'rxjs';
 
+
+
+
+// Custom validator to check for no whitespace or special characters
+function noWhitespaceOrSpecialChars(control: AbstractControl): ValidationErrors | null {
+  const value = control.value;
+  const regex = /[\s!@#$%^&*(),.?":{}|<>]/g;
+  return regex.test(value) ? { invalidChars: true } : null;
+}
+
+// Custom date validator (Example placeholder)
+function dateValidator(type: 'start' | 'end'): any {
+  return (control: AbstractControl): ValidationErrors | null => {
+    // Implement your date validation logic here
+    return null;
+  };
+}
+
+// Custom date range validator (Example placeholder)
+function dateRangeValidator(group: AbstractControl): ValidationErrors | null {
+  const startDate = group.get('startDate')?.value;
+  const endDate = group.get('endDate')?.value;
+  // Example logic: Ensure endDate is after startDate
+  return startDate && endDate && new Date(startDate) > new Date(endDate) ?
+    { invalidDateRange: true } : null;
+}
 
 @Component({
   selector: 'app-index',
@@ -70,6 +96,7 @@ userForm!: FormGroup;
     this.setMinDate();
     this.createForm();
     this.listenToStartDateChanges();
+    this.createForm();
   }
 
   /*
@@ -78,21 +105,24 @@ userForm!: FormGroup;
     *
   */
 
+
+
   createForm() {
     this.userForm = this.user_form.group({
-     	region: ['', [Validators.required, Validators.minLength(4)]],
-      firstname: ['', [Validators.required, Validators.minLength(4)]],
-      lastname: ['', [Validators.required, Validators.minLength(4)]],
+      region: ['', [Validators.required, Validators.minLength(4), noWhitespaceOrSpecialChars]],
+      firstname: ['', [Validators.required, Validators.minLength(4), noWhitespaceOrSpecialChars]],
+      lastname: ['', [Validators.required, Validators.minLength(4), noWhitespaceOrSpecialChars]],
       email: ['', [Validators.required, Validators.email]],
-      startDate: ['', [Validators.required, this.dateValidator('start')]],
-      endDate: ['', [Validators.required, this.dateValidator('end')]],
+      startDate: ['', [Validators.required, dateValidator('start')]],
+      endDate: ['', [Validators.required, dateValidator('end')]],
       inquiryText: ['', [Validators.required, Validators.minLength(8)]],
       additionalDetails: ['', [Validators.required, Validators.minLength(8)]],
-      fullname: ['', [Validators.minLength(4)]],
-      phone: ['', [Validators.required, Validators.minLength(12)]],
-      bookingNumber: ['', [Validators.required]]
-    }, { validators: this.dateRangeValidator });
+      fullname: ['', [Validators.minLength(4), noWhitespaceOrSpecialChars]],
+      phone: ['', [Validators.required, Validators.minLength(12), noWhitespaceOrSpecialChars]],
+      bookingNumber: ['', [Validators.required, noWhitespaceOrSpecialChars]]
+    }, { validators: dateRangeValidator });
   }
+
 
   // Date validator method
   dateValidator(type: 'start' | 'end') {

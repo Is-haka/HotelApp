@@ -134,14 +134,14 @@ userForm!: FormGroup;
       firstname: ['', [Validators.required, Validators.minLength(4), noWhitespaceOrSpecialChars]],
       lastname: ['', [Validators.required, Validators.minLength(4), noWhitespaceOrSpecialChars]],
       email: ['', [Validators.required, Validators.email]],
-      startDate: ['', [Validators.required, dateValidator('start')]],
-      endDate: ['', [Validators.required, dateValidator('end')]],
+      startDate: ['', [Validators.required, this.dateValidator('start')]],
+      endDate: ['', [Validators.required, this.dateValidator('end')]],
       inquiryText: ['', [Validators.required, Validators.minLength(8)]],
       additionalDetails: ['', [Validators.required, Validators.minLength(10)]],
       fullname: ['', [Validators.minLength(4), noWhitespaceOrSpecialChars]],
       phone: ['', [Validators.required, Validators.minLength(10), noWhitespaceOrSpecialChars]],
       bookingNumber: ['', [Validators.required, Validators.minLength(5), noWhitespaceOrSpecialChars]]
-    }, { validators: dateRangeValidator });
+    }, { validators: this.dateRangeValidator });
   }
 
 

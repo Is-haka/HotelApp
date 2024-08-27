@@ -127,6 +127,13 @@ userForm!: FormGroup;
   */
 
 
+  isChatOpen = false;
+
+  toggleChat() {
+    this.isChatOpen = !this.isChatOpen;
+  }
+
+
 
   createForm() {
     this.userForm = this.user_form.group({

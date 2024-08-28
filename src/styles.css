@@ -13,20 +13,56 @@
 
 
   /* Font size */
-  --font-size: 13.5px;
+  --header-font-size: 13px;
+  --font-size: 10.5px;
 
   /* Font styles */
   --font-style-normal: normal;
   --font-style-italic: italic;
+  --background-gradient-1: #5ABCB9;
+  --background-gradient-2: #83dbd8;
+  --background-gradient-3: #f1f1f1;
 }
+
+/* WebKit-based browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 12px; /* Width of the scrollbar */
+  height: 12px; /* Height of the scrollbar (for horizontal scrollbars) */
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Background color of the scrollbar track */
+  border-radius: 10px; /* Rounded corners for the scrollbar track */
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, var(--background-gradient-1), var(--background-gradient-1), var(--background-gradient-2));
+  border-radius: 10px; /* Rounded corners for the scrollbar thumb */
+  border: 3px solid #f1f1f1; /* Adds a border around the thumb to create padding */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #1b89ff; /* Color of the scrollbar thumb on hover */
+  transition: all 0.5s ease-in-out;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin; /* Makes the scrollbar thinner */
+  scrollbar-color: linear-gradient(45deg, var(--background-gradient-1), var(--background-gradient-2), var(--background-gradient-3));
+}
+
 
 html, body {
   font-family: var(--font-montserrat);
-  font-weight: var(--font-weight-light);
+  font-weight: var(--font-weight-medium);
   font-style: var(--font-style-normal);
 }
-p, a, span, input, li {
-  font-size: var(--font-size);
+h1, h2, h5, h6 {
+  font-size: var(--header-font-size) !important;
+}
+p, a, span, input, li, button, label, div {
+  font-size: var(--font-size) !important;
 }
 .chat-container {
   padding: 10px;
@@ -63,7 +99,14 @@ p, a, span, input, li {
 }
 
 .btn-primary {
+  background: linear-gradient(45deg, var(--background-gradient-1), var(--background-gradient-1), var(--background-gradient-2)) !important;
+  border: 1px solid var(--background-gradient-3) !important;
   border-radius: 20px;
+}
+
+.border-outline-secondary {
+  border-radius: 20px;
+  border: 1px solid gray;
 }
 
 .cursor-pointer {
@@ -97,7 +140,7 @@ p, a, span, input, li {
 }
 
 .user-message {
-  background-color: #1b89ff;
+  background: linear-gradient(45deg, var(--background-gradient-1), var(--background-gradient-1), var(--background-gradient-2));
   color: #fff;
   margin-right: 12px;
 }
@@ -120,7 +163,7 @@ p, a, span, input, li {
 .user-message::before {
   right: -10px;
   border-bottom-left-radius: 16px 14px;
-  box-shadow: -6px 0 0 0 #1b89ff;
+  box-shadow: -6px 0 0 0 var(--background-gradient);
 }
 
 .bot-message::after,
@@ -162,4 +205,73 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 #filterSuggestion:hover {
   box-shadow: 0 0 1px 1px rgba(201, 201, 201, 0.397);
+}
+
+.chat-widget {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.chat-button {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, var(--background-gradient-1), var(--background-gradient-1), var(--background-gradient-2));
+  color: white;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.chat-button:hover {
+  transform: scale(1.1);
+}
+
+.chat-window {
+  position: fixed;
+  bottom: 100px;
+  right: 20px;
+  width: 390px;
+  height: 500px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 5px 40px rgba(0, 0, 0, 0.16);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.chat-window.open {
+  display: flex;
+}
+
+.chat-header {
+  background: linear-gradient(45deg, var(--background-gradient-1), var(--background-gradient-1), var(--background-gradient-2));
+  color: white;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chat-header h3 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.chat-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
 }

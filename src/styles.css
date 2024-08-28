@@ -19,6 +19,9 @@
   /* Font styles */
   --font-style-normal: normal;
   --font-style-italic: italic;
+  --background-gradient-1: #5ABCB9;
+  --background-gradient-2: #83dbd8;
+  --background-gradient-3: #f1f1f1;
 }
 
 /* WebKit-based browsers (Chrome, Safari, Edge) */
@@ -33,19 +36,20 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #1b89ff; /* Color of the scrollbar thumb */
+  background: linear-gradient(45deg, var(--background-gradient-1), var(--background-gradient-1), var(--background-gradient-2));
   border-radius: 10px; /* Rounded corners for the scrollbar thumb */
   border: 3px solid #f1f1f1; /* Adds a border around the thumb to create padding */
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background-color: #1b89ff; /* Color of the scrollbar thumb on hover */
+  transition: all 0.5s ease-in-out;
 }
 
 /* Firefox */
 * {
   scrollbar-width: thin; /* Makes the scrollbar thinner */
-  scrollbar-color: #1b89ff #f1f1f1; /* Thumb color and track color */
+  scrollbar-color: linear-gradient(45deg, var(--background-gradient-1), var(--background-gradient-2), var(--background-gradient-3));
 }
 
 
@@ -95,7 +99,14 @@ p, a, span, input, li, button, label, div {
 }
 
 .btn-primary {
+  background: linear-gradient(45deg, var(--background-gradient-1), var(--background-gradient-1), var(--background-gradient-2)) !important;
+  border: 1px solid var(--background-gradient-3) !important;
   border-radius: 20px;
+}
+
+.border-outline-secondary {
+  border-radius: 20px;
+  border: 1px solid gray;
 }
 
 .cursor-pointer {
@@ -129,7 +140,7 @@ p, a, span, input, li, button, label, div {
 }
 
 .user-message {
-  background-color: #1b89ff;
+  background: linear-gradient(45deg, var(--background-gradient-1), var(--background-gradient-1), var(--background-gradient-2));
   color: #fff;
   margin-right: 12px;
 }
@@ -152,7 +163,7 @@ p, a, span, input, li, button, label, div {
 .user-message::before {
   right: -10px;
   border-bottom-left-radius: 16px 14px;
-  box-shadow: -6px 0 0 0 #1b89ff;
+  box-shadow: -6px 0 0 0 var(--background-gradient);
 }
 
 .bot-message::after,
@@ -207,7 +218,7 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background-color: #007bff;
+  background: linear-gradient(45deg, var(--background-gradient-1), var(--background-gradient-1), var(--background-gradient-2));
   color: white;
   border: none;
   cursor: pointer;
@@ -239,7 +250,7 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 }
 
 .chat-header {
-  background-color: #007bff;
+  background: linear-gradient(45deg, var(--background-gradient-1), var(--background-gradient-1), var(--background-gradient-2));
   color: white;
   padding: 10px;
   display: flex;

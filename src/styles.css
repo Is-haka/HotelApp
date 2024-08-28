@@ -68,7 +68,7 @@ p, a, span, input, li, button, label, div {
   padding: 10px;
   max-width: 600px;
   margin: auto;
-  /* background-color: #f8f9fa; */
+  transition: all 0.5s ease-in-out;
 }
 
 .message {
@@ -76,6 +76,7 @@ p, a, span, input, li, button, label, div {
   align-items: center;
   justify-content: center;
   margin-bottom: 10px;
+  transition: all 0.5s ease-in-out;
 }
 
 .message-content {
@@ -87,6 +88,7 @@ p, a, span, input, li, button, label, div {
   justify-content: center;
   text-align: center;
   border: none; /* Remove border */
+  transition: all 0.5s ease-in-out;
 }
 
 .input-group {
@@ -131,18 +133,21 @@ p, a, span, input, li, button, label, div {
   padding: 10px 15px;
   position: relative;
   border-radius: 18px;
+  transition: all 0.5s ease-in-out;
 }
 
 .bot-message {
   background-color: #e8e8ff;
   color: #000;
   margin-left: 12px;
+  transition: all 0.5s ease-in-out;
 }
 
 .user-message {
-  background: linear-gradient(45deg, var(--background-gradient-1), var(--background-gradient-1), var(--background-gradient-2));
+  background: linear-gradient(45deg, var(--background-gradient-1), var(--background-gradient-1), var(--background-gradient-2), var(--background-gradient-2));
   color: #fff;
   margin-right: 12px;
+  transition: all 0.5s ease-in-out;
 }
 
 .bot-message::before,
@@ -163,7 +168,7 @@ p, a, span, input, li, button, label, div {
 .user-message::before {
   right: -10px;
   border-bottom-left-radius: 16px 14px;
-  box-shadow: -6px 0 0 0 var(--background-gradient);
+  box-shadow: -6px 0 0 0 var(--background-gradient-2);
 }
 
 .bot-message::after,
@@ -243,6 +248,25 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   flex-direction: column;
   overflow: hidden;
   transition: all 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .chat-window {
+    width: 330px;
+  }
+  .yesNo {
+    background: transparent !important;
+    font-weight: var(--font-weight-bold);
+    font-size: 9.5px !important;
+  }
+}
+
+@media (max-width: 991px) {
+  .chat-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
 }
 
 .chat-window.open {

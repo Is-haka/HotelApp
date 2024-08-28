@@ -37,7 +37,7 @@
                   </div>
 
                   <!-- Display options initially -->
-                  <div *ngIf="currentStep === 0 && currentComplainStep === 0" class="d-flex flex-column flex-lg-row g-3">
+                  <div *ngIf="currentStep === 0 && currentComplainStep === 0" class="start-card d-flex flex-column flex-lg-row g-3">
                     <div class="col-md-6">
                       <div
                         class="card h-100 cursor-pointer hover-shadow"
@@ -281,9 +281,9 @@
                   </div>
 
                   <!-- Complaints/Inquiry process -->
-                  <div *ngIf="userChoice === 'Complaints/Inquiry'" class="mt-4">
+                  <div *ngIf="userChoice === 'Complaints/Inquiry'" class="mt-1">
                     <div *ngIf="currentComplainStep === 1" class="mb-3 text-start">
-                      <span class="p-2 rounded bg-light text-dark">Click <strong>'Yes'</strong> for inquiry or <strong>'No'</strong> for complaints about a booking</span>
+                      <span class="p-2 rounded bg-light text-dark yesNo">Click <strong>'Yes'</strong> for inquiry or <strong>'No'</strong> for complaints about a booking</span>
                       <div class="d-flex align-items-center position-relative justify-content-start mt-2">
                         <button class="btn btn-sm border-outline-secondary" (click)="returnStep()"><i class="fas fa-step-backward fa-sm text-secondary fa-fw"></i></button> &nbsp;
                         <button (click)="handleYesNo('Yes')" class="btn btn-sm btn-primary m-2">Yes</button>
@@ -309,7 +309,7 @@
                         </div>
                         <div class="form-group m-2">
                           <input
-                          type="text"
+                          type="tel"
                           class="form-control form-control-sm"
                           placeholder="Your phone number"
                           formControlName="phone"
@@ -339,7 +339,7 @@
                         </div>
                       </div>
                       <div *ngIf="currentComplainStep === 4" class="mb-3 text-start">
-                        <span class="p-2 rounded bg-light text-dark">Click <strong>'Yes'</strong> if you have more details or <strong>'No'</strong> to submit your inquiry</span>
+                        <span class="p-2 rounded bg-light text-dark yesNo">Click <strong>'Yes'</strong> if you have more details or <strong>'No'</strong> to submit your inquiry</span>
                           <div class="d-flex align-items-center position-relative justify-content-start mt-2">
                             <button class="btn btn-sm border-outline-secondary" (click)="returnStep()"><i class="fas fa-step-backward fa-sm text-secondary fa-fw"></i></button> &nbsp;
                             <button (click)="yesNo('Yes')" class="btn btn-sm btn-primary m-2">Yes</button>
@@ -422,7 +422,7 @@
                                 <p class="text-capitalize"><strong>Check-out: </strong>{{return.end_date}}</p>
                               </div>
                               <div class="card-footer bg-white">
-                                <span class="p-2 rounded bg-light text-dark">Click <strong>'Yes'</strong> if this information is correct <strong>'No'</strong> if not</span>
+                                <span class="p-2 rounded bg-light text-dark yesNo">Click <strong>'Yes'</strong> if this information is correct <strong>'No'</strong> if not</span>
                                 <div class="d-flex align-items-center position-relative justify-content-start mt-2">
                                   <button class="btn btn-sm border-outline-secondary" (click)="returnStep()"><i class="fas fa-step-backward fa-sm text-secondary fa-fw"></i></button> &nbsp;
                                   <button (click)="[handleYesNo('Yes'), fetchComplain()]" class="btn btn-sm btn-primary m-2">Yes</button>
@@ -440,7 +440,7 @@
                         </div>
                       </div>
                       <div *ngIf="currentComplainStep === 10" class="mb-3">
-                        <span class="p-2 rounded bg-light text-dark">Click <strong>'Yes'</strong> if satisfactory or <strong>'No'</strong> for more answer</span>
+                        <span class="p-2 rounded bg-light text-dark yesNo">Click <strong>'Yes'</strong> if satisfactory or <strong>'No'</strong> for more answer</span>
                           <div class="d-flex align-items-center position-relative justify-content-start mt-2">
                             <button class="btn btn-sm border-outline-secondary" (click)="returnStep()"><i class="fas fa-step-backward fa-sm text-secondary fa-fw"></i></button> &nbsp;
                             <button (click)="[handleYesNo('Yes'), fetchBooking()]" class="btn btn-sm btn-primary m-2">Yes</button>

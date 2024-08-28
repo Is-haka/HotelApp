@@ -250,6 +250,25 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   transition: all 0.3s ease;
 }
 
+@media (max-width: 520px) {
+  .chat-window {
+    width: 305px !important;
+    right: 8px;
+  }
+
+  .chat-heading {
+    width: 100%;
+    text-align: center !important;
+    position: relative;
+    justify-content: center !important;
+  }
+
+  .chat-container {
+    max-width: 100%;
+    padding: 5px;
+  }
+}
+
 @media (max-width: 768px) {
   .chat-window {
     width: 330px;
@@ -258,6 +277,13 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     background: transparent !important;
     font-weight: var(--font-weight-bold);
     font-size: 9.5px !important;
+  }
+
+  .chat-heading {
+    width: 100%;
+    text-align: center !important;
+    position: relative;
+    justify-content: center !important;
   }
 }
 

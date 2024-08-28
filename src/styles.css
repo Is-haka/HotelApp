@@ -58,7 +58,7 @@ html, body {
   font-weight: var(--font-weight-medium);
   font-style: var(--font-style-normal);
 }
-h1, h2, h3, h5, h6 {
+h1, h2, h5, h6 {
   font-size: var(--header-font-size) !important;
 }
 p, a, span, input, li, button, label, div {
@@ -260,7 +260,7 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 .chat-header h3 {
   margin: 0;
-  font-size: 16px;
+  font-size: 20px;
 }
 
 .close-button {

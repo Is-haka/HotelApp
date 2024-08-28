@@ -7,7 +7,9 @@
   <!-- Chat window -->
   <div class="chat-window" [class.open]="isChatOpen">
     <div class="chat-header">
-      <h3 class="chat-name">Hotel Chat System</h3>
+      <div class="chat-heading">
+        <h3 class="chat-name">Hotel Chat System</h3>
+      </div>
       <button class="close-button" (click)="toggleChat()">
         <i class="fas fa-times"></i>
       </button>
@@ -20,7 +22,7 @@
           <div class="col-md-12">
             <div class="">
               <div class="card-body">
-                <h2 class="card-title text-center mb-4" style="font-size: 20px !important;">Welcome to Hotel Chatting System</h2>
+                <h2 class="card-title text-center mb-4" style="font-size: 20px !important;">Welcome to Hotel Chat System</h2>
 
                 <div class="chat-container">
                   <!-- Display chat messages -->
@@ -390,6 +392,7 @@
                         <div class="invalid-feedback">
                           <small *ngIf="userForm.get('bookingNumber')?.errors?.['minlength']">Book number is required.</small>
                         </div>
+                        <button class="btn btn-sm border-outline-secondary" (click)="returnStep()"><i class="fas fa-step-backward fa-sm text-secondary fa-fw"></i></button> &nbsp;
                         <button class="btn btn-sm btn-primary mt-2" [disabled]="userForm.get('bookingNumber')?.invalid " (click)="complainStep()">Next</button>
                         <ul *ngIf="filterdBookNo && filterdBookNo.length > 0" class="list-group mt-2">
                           <li

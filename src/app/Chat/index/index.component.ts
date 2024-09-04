@@ -976,7 +976,6 @@ chooseOption(option: string) {
                     if (response.status) {
                       this.bookingStatus = 'success';
                       this.updateTokenTracking(now); // Update token tracking
-                      this.resetChat(); // Optionally reset chat after successful booking
                     } else {
                       this.bookingStatus = 'failed';
                       this.messages.push({
@@ -984,12 +983,14 @@ chooseOption(option: string) {
                         sender: 'bot',
                       });
                     }
+                    this.startCountdown(5000);
                   },
                   (error) => {
                     this.messages.push({
                       text: 'An error occurred while booking. Please try again later.',
                       sender: 'bot',
                     });
+                    this.startCountdown(5000);
                   }
                 );
             } else {
@@ -1039,6 +1040,7 @@ chooseOption(option: string) {
     this.countdownActive = true;
     setTimeout(() => {
       this.resetChat();
+      this.startNewBooking();
     }, duration);
   }
 
@@ -1080,10 +1082,15 @@ chooseOption(option: string) {
     }
   }
 
+  startNewBooking() {
+    this.bookingStatus = 'nextBooking';
+    this.resetChat();
+
+  }
+
   resetChat() {
     this.currentStep = 0;
     this.userChoice = '';
-    this.bookingStatus = '';
     this.selectedHotel = '';
     this.selectedRoom = 0;
     this.region = '';
